@@ -9,4 +9,6 @@ public interface UserService {
     void createUserProfile(UserProfiles userProfile);
     String hash(String rawPassword);
     boolean verify(String rawPassword, String hashed);
+    UserProfiles findUserProfilesByEmail(String email);
+    void updateUserProfile(String email, UserProfiles updatedProfile);
 }

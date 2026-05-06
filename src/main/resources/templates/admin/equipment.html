@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Quản lý Thiết bị - Admin</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Danh mục Thiết bị</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Thiết bị</li>
+        </ol>
+
+        <!-- Thông báo thành công/lỗi nếu có -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+                <h5 class="mb-0"><i class="fas fa-desktop me-1"></i> Danh sách thiết bị</h5>
+                <a th:href="@{/admin/device/add}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Thêm thiết bị mới
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th>Tên thiết bị</th>
+                            <th>Mô tả</th>
+                            <th>Số lượng</th>
+                            <th>Trạng thái</th>
+                            <th>Phòng Lab (Loại)</th>
+                            <th>Khoa/Ngành</th>
+                            <th style="width: 150px;" class="text-center">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Lặp danh sách thiết bị từ Model -->
+                        <tr th:each="device : ${devices}">
+                            <td th:text="${device.deviceId}">1</td>
+                            <td th:text="${device.deviceName}" class="fw-bold">Máy chiếu Sony</td>
+                            <td th:text="${device.description}">Full HD, 3000 lumens</td>
+                            <td th:text="${device.quantity}">5</td>
+                            <td>
+                                    <span th:class="${device.status == 'ACTIVE' ? 'badge bg-success' : 'badge bg-danger'}"
+                                          th:text="${device.status}">ACTIVE</span>
+                            </td>
+                            <!-- Dữ liệu hardcoded từ DB -->
+                            <td th:text="${device.labType.typeName}">Lab Tin học</td>
+                            <td th:text="${device.department.deptName}">Công nghệ thông tin</td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/admin/device/edit/{id}(id=${device.deviceId})}"
+                                       class="btn btn-outline-warning btn-sm" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:href="@{/admin/device/delete/{id}(id=${device.deviceId})}"
+                                       class="btn btn-outline-danger btn-sm" title="Xóa"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa thiết bị này?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Hiển thị nếu danh sách trống -->
+                        <tr th:if="${#lists.isEmpty(devices)}">
+                            <td colspan="8" class="text-center py-4 text-muted">Chưa có thiết bị nào trong danh sách.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

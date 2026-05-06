@@ -71,30 +71,53 @@ public class AuthController {
             return "auth/login";
         }
 
-//        if (session.getAttribute("userLogin") != null) {
-//            String role = (String) session.getAttribute("role");
-//            return role.equals("ADMIN")
-//                    ? "redirect:/admin/dashboard"
-//                    : role.equals("LECTURER")
-//                    ? "redirect:/lecturer/home"
-//                    : "redirect:/student/home";
-//        }
+        Optional<Users> userOp = Optional.ofNullable(userService.login(loginDTO.getEmail(), loginDTO.getPassword()));
 
-        if(loginDTO.getEmail().equals("admin123@gmail.com") && loginDTO.getPassword().equals("admin123")){
-            session.setAttribute("userLogin", "admin");
-            session.setAttribute("role", "ADMIN");
-            return "redirect:/admin/dashboard";
-        }
-        else {
-            Optional<Users> user = Optional.ofNullable(userService.login(loginDTO.getEmail(), loginDTO.getPassword()));
-            if (user.isPresent()) {
-                session.setAttribute("userLogin", user.get().getEmail());
-                session.setAttribute("role", user.get().getRole());
-                return user.get().getRole().equals(Role.LECTURER) ? "redirect:/lecturer/home" : "redirect:/student/home";
+        if (userOp.isPresent()) {
+            Users user = userOp.get();
+
+            session.setAttribute("userLogin", user.getEmail());
+            session.setAttribute("role", user.getRole().name());
+
+            Role role = user.getRole();
+            if (role == Role.ADMIN) {
+                return "redirect:/admin/equipment";
+            } else if (role == Role.LECTURER) {
+                return "redirect:/lecturer/home";
             } else {
-                redirectAttributes.addFlashAttribute("error" , "Tài khoản hoặc mật khẩu không chính xác !");
-                return "auth/login";
+                return "redirect:/student/home";
             }
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Tài khoản hoặc mật khẩu không chính xác!");
+            return "redirect:/auth/login";
         }
+    }
+
+    @GetMapping("/profile")
+    public String viewProfile(HttpSession session, Model model) {
+        String email = (String) session.getAttribute("userLogin");
+        if (email == null) return "redirect:/auth/login";
+
+        UserProfiles profile = userService.findUserProfilesByEmail(email);
+        model.addAttribute("userProfile", profile);
+        return "auth/profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute UserProfiles updatedProfile, HttpSession session, RedirectAttributes redirectAttributes) {
+        String email = (String) session.getAttribute("userLogin");
+        userService.updateUserProfile(email, updatedProfile);
+        redirectAttributes.addFlashAttribute("message", "Cập nhật thành công!");
+        return session.getAttribute("role").equals("ADMIN")
+                ? "redirect:/admin/equipment"
+                : session.getAttribute("role").equals("LECTURER")
+                ? "redirect:/lecturer/home"
+                : "redirect:/student/home" ;
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/auth/login";
     }
 }

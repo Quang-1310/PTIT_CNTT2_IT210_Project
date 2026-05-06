@@ -1,6 +1,7 @@
 package ra.edu.ptit_cntt2_it210_project.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ra.edu.ptit_cntt2_it210_project.model.entity.UserProfiles;
 import ra.edu.ptit_cntt2_it210_project.model.entity.Users;
 import ra.edu.ptit_cntt2_it210_project.repository.UserProfileRepository;
@@ -54,5 +55,27 @@ public class UserServiceImpl implements UserService{
             return false;
         }
     }
+
+    @Override
+    public UserProfiles findUserProfilesByEmail(String email) {
+        return userProfileRepository.findUserProfilesByEmail(email);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserProfile(String email, UserProfiles updatedProfile) {
+        UserProfiles existingProfile = userProfileRepository.findUserProfilesByEmail(email);
+
+        if (existingProfile != null) {
+            existingProfile.setFullName(updatedProfile.getFullName());
+            existingProfile.setPhone(updatedProfile.getPhone());
+            existingProfile.setAddress(updatedProfile.getAddress());
+
+            userProfileRepository.save(existingProfile);
+        } else {
+            throw new RuntimeException("Không tìm thấy thông tin người dùng với email: " + email);
+        }
+    }
+
 
 }
