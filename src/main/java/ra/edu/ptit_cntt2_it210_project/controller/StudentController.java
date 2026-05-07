@@ -27,44 +27,44 @@ public class StudentController {
     private final DepartmentService departmentService;
     private final LecturerService lecturerService;
     private final MentoringSessionService sessionService;
-    private final UserService userService;
 
     public StudentController(DepartmentService departmentService,
                              LecturerService lecturerService,
-                             MentoringSessionService sessionService,
-                             UserService userService) {
+                             MentoringSessionService sessionService) {
         this.departmentService = departmentService;
         this.lecturerService = lecturerService;
         this.sessionService = sessionService;
-        this.userService = userService;
     }
 
-    // ✅ CORE-05: Form đặt lịch cố vấn
     @GetMapping("/schedule")
     public String scheduleForm(
-            @RequestParam(required = false) Long deptId,
+            @RequestParam(value = "deptId", required = false) Long deptId,
             HttpSession session,
             Model model) {
 
-        // ✅ Lấy user từ session
         Users currentUser = getCurrentUserFromSession(session);
         if (currentUser == null) {
-            return "redirect:/login?error=unauthorized";
+            return "redirect:/auth/login";
         }
+
+        ScheduleFormDTO formDTO = new ScheduleFormDTO();
+
+        if (deptId != null) {
+            formDTO.setDepartmentId(deptId);
+        }
+
+        model.addAttribute("scheduleForm", formDTO);
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("lecturers", lecturerService.findByDepartment(deptId));
 
-        // ✅ Min datetime (hiện tại)
         model.addAttribute("minDateTime", LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
 
-        model.addAttribute("scheduleForm", new ScheduleFormDTO());
         return "student/schedule";
     }
 
-    // ✅ CORE-05: Đặt lịch + VALIDATE CONFLICT
     @PostMapping("/schedule/book")
     public String bookSchedule(
             @Valid @ModelAttribute("scheduleForm") ScheduleFormDTO form,
@@ -83,13 +83,11 @@ public class StudentController {
         }
 
         try {
-            // ✅ CORE LOGIC 1: Không quá khứ
             if (form.getStartTime().isBefore(LocalDateTime.now())) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Không thể đặt lịch trong quá khứ!");
                 return "redirect:/student/schedule?error";
             }
 
-            // ✅ CORE LOGIC 2: Check conflict giảng viên
             LocalDateTime endTime = form.getStartTime().plusMinutes(30);
             if (sessionService.hasConflict(form.getLecturerId(), form.getStartTime(), endTime)) {
                 redirectAttributes.addFlashAttribute("errorMsg",
@@ -97,7 +95,6 @@ public class StudentController {
                 return "redirect:/student/schedule?error";
             }
 
-            // ✅ Tạo session với student từ session
             sessionService.createSession(form, currentUser.getUserId());
             redirectAttributes.addFlashAttribute("successMsg",
                     " Đặt lịch thành công! Chờ giảng viên xác nhận trong 24h.");
@@ -112,7 +109,6 @@ public class StudentController {
         return "redirect:/student/history";
     }
 
-    // ✅ CORE-09: Xác nhận hủy lịch
     @GetMapping("/schedule/cancel/{id}")
     public String cancelConfirm(
             @PathVariable Long id,
@@ -122,11 +118,11 @@ public class StudentController {
 
         Users currentUser = getCurrentUserFromSession(session);
         if (currentUser == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {
-            MentoringSessions sessionEntity = sessionService.findByStudentIdAndId(currentUser.getId(), id);
+            MentoringSessions sessionEntity = sessionService.findByStudentIdAndId(currentUser.getUserId(), id).orElseThrow(() -> new EntityNotFoundException("Lịch không tồn tại hoặc không thuộc bạn!"));;
             if (!sessionService.canCancel(sessionEntity)) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Quá hạn hủy (phải trước 24h)!");
                 return "redirect:/student/history?error=too_late";
@@ -139,7 +135,6 @@ public class StudentController {
         }
     }
 
-    // ✅ CORE-09: Thực hiện hủy + Unlock slot
     @PostMapping("/schedule/cancel/{id}")
     public String cancelSchedule(
             @PathVariable Long id,
@@ -154,7 +149,7 @@ public class StudentController {
         try {
             sessionService.cancelSession(currentUser.getUserId(), id);
             redirectAttributes.addFlashAttribute("successMsg",
-                    "✅ Hủy lịch thành công! Khung giờ đã được giải phóng cho sinh viên khác.");
+                    "Hủy lịch thành công! Khung giờ đã được giải phóng cho sinh viên khác.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
         } catch (Exception e) {
@@ -163,22 +158,19 @@ public class StudentController {
         return "redirect:/student/history";
     }
 
-    // ✅ CORE-07: Lịch sử học tập + thiết bị mượn
     @GetMapping("/history")
     public String history(HttpSession session, Model model) {
         Users currentUser = getCurrentUserFromSession(session);
         if (currentUser == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         model.addAttribute("sessions", sessionService.findStudentHistory(currentUser.getUserId()));
-        // TODO: borrowingRecords khi có entity
         model.addAttribute("borrowingRecords", List.of());
         return "student/history";
     }
 
-    // ✅ Helper: Lấy user từ session
     private Users getCurrentUserFromSession(HttpSession session) {
-        return (Users) session.getAttribute("loginUser"); // Từ login controller
+        return (Users) session.getAttribute("loginUser");
     }
 }

@@ -56,15 +56,20 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+//    @Override
+//    public UserProfiles findUserProfilesByEmail(String email) {
+//        return userProfileRepository.findByEmail(email);
+//    }
+
     @Override
-    public UserProfiles findUserProfilesByEmail(String email) {
-        return userProfileRepository.findUserProfilesByEmail(email);
+    public UserProfiles findUserProfileByUserId(Long userId) {
+        return userProfileRepository.findByUserUserId(userId);
     }
 
     @Override
     @Transactional
     public void updateUserProfile(String email, UserProfiles updatedProfile) {
-        UserProfiles existingProfile = userProfileRepository.findUserProfilesByEmail(email);
+        UserProfiles existingProfile = userProfileRepository.findByEmail(email);
 
         if (existingProfile != null) {
             existingProfile.setFullName(updatedProfile.getFullName());
@@ -75,6 +80,11 @@ public class UserServiceImpl implements UserService{
         } else {
             throw new RuntimeException("Không tìm thấy thông tin người dùng với email: " + email);
         }
+    }
+
+    @Override
+    public Optional<Users> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
 

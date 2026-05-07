@@ -27,4 +27,7 @@ public class Users {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfiles profile;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 }

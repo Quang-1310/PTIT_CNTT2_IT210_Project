@@ -20,4 +20,10 @@ public interface LecturerRepository extends JpaRepository<Lecturers, Long> {
     List<Lecturers> findByDepartmentId(@Param("deptId") Long deptId);
 
     Optional<Lecturers> findByUserId(Long userId);
+
+    @Query("SELECT l FROM Lecturers l " +
+            "JOIN FETCH l.user u " +
+            "WHERE u.isDeleted = false " +
+            "ORDER BY u.profile.fullName")
+    List<Lecturers> findAllActive();
 }

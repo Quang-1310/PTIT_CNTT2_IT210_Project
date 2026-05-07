@@ -33,10 +33,11 @@ public interface MentoringSessionRepository extends JpaRepository<MentoringSessi
 
     @Query("SELECT s FROM MentoringSessions s " +
             "JOIN FETCH s.lecturer l " +
-            "WHERE s.lecturer.userId = :id AND s.student.userId = :studentId")
+            "JOIN FETCH s.student u " +
+            "WHERE s.sessionId = :sessionId AND u.userId = :studentId")
     Optional<MentoringSessions> findByStudentIdAndId(
             @Param("studentId") Long studentId,
-            @Param("id") Long id
+            @Param("id") Long sessionId
     );
 
     @Query("SELECT s FROM MentoringSessions s " +
@@ -44,4 +45,6 @@ public interface MentoringSessionRepository extends JpaRepository<MentoringSessi
             "AND s.status = 'PENDING' " +
             "ORDER BY s.startTime ASC")
     List<MentoringSessions> findPendingByLecturer(@Param("lecturerId") Long lecturerId);
+
+
 }

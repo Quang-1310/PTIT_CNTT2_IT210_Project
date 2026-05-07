@@ -1,7 +1,6 @@
 package ra.edu.ptit_cntt2_it210_project.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ra.edu.ptit_cntt2_it210_project.model.dto.ScheduleFormDTO;
@@ -39,7 +38,7 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
     }
 
     @Override
-    public MentoringSessions createSession(ScheduleFormDTO form, Long studentId) {
+    public void createSession(ScheduleFormDTO form, Long studentId) {
         Lecturers lecturer = lecturerRepository.findByUserId(form.getLecturerId())
                 .orElseThrow(() -> new EntityNotFoundException("Giảng viên không tồn tại ID: " + form.getLecturerId()));
 
@@ -48,15 +47,14 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
 
         LocalDateTime endTime = form.getStartTime().plusMinutes(30);
 
-        MentoringSessions session = MentoringSessions.builder()
-                .lecturer(lecturer)
-                .student(student)
-                .startTime(form.getStartTime())
-                .endTime(endTime)
-                .status("PENDING")
-                .build();
+        MentoringSessions session = new MentoringSessions();
+        session.setLecturer(lecturer);
+        session.setStudent(student);
+        session.setStartTime(form.getStartTime());
+        session.setEndTime(endTime);
+        session.setStatus("PENDING");
 
-        return sessionRepository.save(session);
+        sessionRepository.save(session);
     }
 
     @Override
@@ -65,7 +63,6 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
                 .orElseThrow(() -> new EntityNotFoundException("Lịch không tồn tại ID: " + id));
     }
 
-    // ✅ FIX: Nhận studentId từ Controller
     @Override
     public List<MentoringSessions> findStudentHistory(Long studentId) {
         return sessionRepository.findHistoryByStudentId(studentId);
@@ -77,10 +74,8 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
         return Duration.between(LocalDateTime.now(), session.getStartTime()).toHours() >= 24;
     }
 
-    // ✅ FIX: Nhận studentId để validate quyền
     @Override
     public void cancelSession(Long studentId, Long sessionId) {
-        // ✅ Check session thuộc student
         MentoringSessions session = sessionRepository.findByStudentIdAndId(studentId, sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Lịch không tồn tại hoặc không thuộc bạn!"));
 
@@ -88,12 +83,10 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
             throw new IllegalStateException(" Quá hạn hủy! Phải hủy trước 24h.");
         }
 
-        // ✅ Unlock slot: Status = CANCELLED
         session.setStatus("CANCELLED");
         sessionRepository.save(session);
     }
 
-    // ✅ Internal: Tìm session theo student + id
     public Optional<MentoringSessions> findByStudentIdAndId(Long studentId, Long sessionId) {
         return sessionRepository.findByStudentIdAndId(studentId, sessionId);
     }
