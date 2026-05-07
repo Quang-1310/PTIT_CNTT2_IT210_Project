@@ -15,7 +15,14 @@ public class Equipments {
     private String description;
     private Integer stockQuantity;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @ManyToOne
     @JoinColumn(name = "dept_id")
     private Departments department;
+
+    @ManyToOne
+    @JoinColumn(name = "lab_id")
+    private Labs lab;
 }

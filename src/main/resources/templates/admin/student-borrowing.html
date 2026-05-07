@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="~{layout/admin-layout :: body}" layout:decorate="~{layout/admin-layout}">
+    <th:block layout:fragment="pageTitle">Theo dõi Sinh viên mượn</th:block>
+
+    <div layout:fragment="adminContent">
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Sinh viên</th>
+                        <th>Thiết bị mượn</th>
+                        <th>Số lượng</th>
+                        <th>Ngày mượn</th>
+                        <th>Hạn trả</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div class="fw-bold">Nguyễn Văn An</div>
+                            <small class="text-muted">B21DCCN001</small>
+                        </td>
+                        <td><span class="badge bg-info text-dark">Kính VR Oculus</span></td>
+                        <td>01</td>
+                        <td>05/05/2026</td>
+                        <td>12/05/2026</td>
+                        <td><span class="badge bg-warning text-dark">Đang mượn</span></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="fw-bold">Lê Thị Bình</div>
+                            <small class="text-muted">B21DCCN050</small>
+                        </td>
+                        <td><span class="badge bg-info text-dark">Arduino Uno R3</span></td>
+                        <td>05</td>
+                        <td>01/05/2026</td>
+                        <td>04/05/2026</td>
+                        <td><span class="badge bg-danger">Quá hạn</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

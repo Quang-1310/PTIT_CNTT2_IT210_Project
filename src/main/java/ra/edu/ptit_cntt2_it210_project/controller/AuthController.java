@@ -81,11 +81,11 @@ public class AuthController {
 
             Role role = user.getRole();
             if (role == Role.ADMIN) {
-                return "redirect:/admin/equipment";
+                return "redirect:/admin/layout";
             } else if (role == Role.LECTURER) {
                 return "redirect:/lecturer/home";
             } else {
-                return "redirect:/student/home";
+                return "redirect:/student/schedule";
             }
         } else {
             redirectAttributes.addFlashAttribute("error", "Tài khoản hoặc mật khẩu không chính xác!");
@@ -112,7 +112,7 @@ public class AuthController {
                 ? "redirect:/admin/equipment"
                 : session.getAttribute("role").equals("LECTURER")
                 ? "redirect:/lecturer/home"
-                : "redirect:/student/home" ;
+                : "redirect:/student/schedule" ;
     }
 
     @GetMapping("/logout")

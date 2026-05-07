@@ -7,7 +7,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "lecturers")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Lecturers {
     @Id
     private Long userId;
@@ -17,7 +20,7 @@ public class Lecturers {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @Column(columnDefinition = "TEXT")
+    @Column
     private String bio;
 
     private String academicRank;

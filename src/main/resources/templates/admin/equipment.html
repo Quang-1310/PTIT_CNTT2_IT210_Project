@@ -2,86 +2,157 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
-<head>
-    <title>Quản lý Thiết bị - Admin</title>
+      layout:decorate="~{admin/layout}"> <head>
+    <title>Danh mục thiết bị</title>
 </head>
 <body>
 
-<div layout:fragment="content">
-    <div class="container-fluid px-4">
-        <h1 class="mt-4">Danh mục Thiết bị</h1>
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Thiết bị</li>
-        </ol>
+<th:block layout:fragment="pageTitle">Danh mục Thiết bị</th:block>
 
-        <!-- Thông báo thành công/lỗi nếu có -->
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
 
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
-                <h5 class="mb-0"><i class="fas fa-desktop me-1"></i> Danh sách thiết bị</h5>
-                <a th:href="@{/admin/device/add}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i> Thêm thiết bị mới
-                </a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-light">
-                        <tr>
-                            <th style="width: 50px;">ID</th>
-                            <th>Tên thiết bị</th>
-                            <th>Mô tả</th>
-                            <th>Số lượng</th>
-                            <th>Trạng thái</th>
-                            <th>Phòng Lab (Loại)</th>
-                            <th>Khoa/Ngành</th>
-                            <th style="width: 150px;" class="text-center">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <!-- Lặp danh sách thiết bị từ Model -->
-                        <tr th:each="device : ${devices}">
-                            <td th:text="${device.deviceId}">1</td>
-                            <td th:text="${device.deviceName}" class="fw-bold">Máy chiếu Sony</td>
-                            <td th:text="${device.description}">Full HD, 3000 lumens</td>
-                            <td th:text="${device.quantity}">5</td>
-                            <td>
-                                    <span th:class="${device.status == 'ACTIVE' ? 'badge bg-success' : 'badge bg-danger'}"
-                                          th:text="${device.status}">ACTIVE</span>
-                            </td>
-                            <!-- Dữ liệu hardcoded từ DB -->
-                            <td th:text="${device.labType.typeName}">Lab Tin học</td>
-                            <td th:text="${device.department.deptName}">Công nghệ thông tin</td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <a th:href="@{/admin/device/edit/{id}(id=${device.deviceId})}"
-                                       class="btn btn-outline-warning btn-sm" title="Sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a th:href="@{/admin/device/delete/{id}(id=${device.deviceId})}"
-                                       class="btn btn-outline-danger btn-sm" title="Xóa"
-                                       onclick="return confirm('Bạn có chắc chắn muốn xóa thiết bị này?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- Hiển thị nếu danh sách trống -->
-                        <tr th:if="${#lists.isEmpty(devices)}">
-                            <td colspan="8" class="text-center py-4 text-muted">Chưa có thiết bị nào trong danh sách.</td>
-                        </tr>
-                        </tbody>
-                    </table>
+<div layout:fragment="adminContent">
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="page" value="0">
+                <input type="hidden" name="size" value="5">
+
+                <!-- Tên thiết bị -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-bold small text-muted mb-1">Tên thiết bị</label>
+                    <input type="text" name="keywordName" class="form-control form-control-sm"
+                           th:value="${keywordName}"
+                           placeholder="VD: Laptop, Arduino...">
                 </div>
-            </div>
+
+                <!-- Dropdown Khoa -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-bold small text-muted mb-1">Khoa</label>
+                    <select name="selectedDeptId" class="form-select form-select-sm">
+                        <option value="">-- Tất cả khoa --</option>
+                        <option th:each="dept : ${departments}"
+                                th:value="${dept.deptId}"
+                                th:text="${dept.deptName}"
+                                th:selected="${selectedDeptId == dept.deptId}"></option>
+                    </select>
+                </div>
+
+                <!-- 2 NÚT TÌM KIẾM (Cùng hàng) -->
+                <div class="col-lg-4 col-md-12">
+                    <div class="d-grid gap-2 d-md-block mt-1">
+                        <button type="submit" class="btn btn-primary btn-sm me-2 px-4">
+                            <i class="fas fa-search me-1"></i>Tìm kiếm
+                        </button>
+                        <a th:href="@{/admin/equipment}" class="btn btn-outline-secondary btn-sm px-4">
+                            <i class="fas fa-redo me-1"></i>Xóa filter
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h6 class="m-0 fw-bold text-primary">Danh sách thiết bị trong kho</h6>
+            <a th:href="@{/admin/equipment/save}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Thêm mới</a>
+        </div>
+        <div class="card-body">
+
+            <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>[[${successMsg}]]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>[[${errorMsg}]]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>STT</th>
+                    <th>Tên thiết bị</th>
+                    <th>Khoa</th>
+                    <th>Số lượng</th>
+                    <th>Mô tả</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="e, iterStat: ${equipments}">
+                    <td th:text="${iterStat.count + (currentPage * 5)}">1</td>
+                    <td th:text="${e.equipmentName}">Máy chiếu Sony 4K</td>
+                    <td>
+                        <div th:text="${e.getDepartment().deptName} + ' - ' + ${e.getLab().labName}">
+                        </div>
+                    </td>
+                    <td th:text="${e.stockQuantity}">15</td>
+                    <td th:text="${e.description}"></td>
+                    <td>
+                        <a th:href="@{/admin/equipment/edit/{id}(id=${e.equipmentId})}"
+                           class="btn btn-sm btn-outline-warning" title="Sửa">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+
+                        <a th:href="@{/admin/equipment/delete/{id}(id=${e.equipmentId})}"
+                           class="btn btn-sm btn-outline-danger"
+                           title="Xóa"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa thiết bị này không?')">
+                            <i class="fas fa-trash"></i> Xóa
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav th:if="${totalPages > 1}" aria-label="Equipment pagination" class="mt-4">
+        <ul class="pagination justify-content-center mb-0">
+
+            <li class="page-item"
+                th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/equipment(
+                   page=${currentPage - 1},
+                   size=5,
+                   keywordName=${keywordName},
+                   selectedDeptId=${selectedDeptId}
+               )}">
+                    <i class="fas fa-chevron-left me-1"></i> Trước
+                </a>
+            </li>
+
+            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                class="page-item"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/admin/equipment(
+                   page=${i},
+                   size=5,
+                   keywordName=${keywordName},
+                   selectedDeptId=${selectedDeptId}
+               )}"
+                   th:text="${i + 1}"></a>
+            </li>
+
+            <li class="page-item"
+                th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/admin/equipment(
+                   page=${currentPage + 1},
+                   size=5,
+                   keywordName=${keywordName},
+                   selectedDeptId=${selectedDeptId}
+               )}">
+                    Sau <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+            </li>
+        </ul>
+
+    </nav>
 </div>
 
 </body>

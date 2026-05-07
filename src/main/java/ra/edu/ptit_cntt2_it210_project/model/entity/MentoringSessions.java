@@ -15,8 +15,7 @@ public class MentoringSessions {
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String status; // PENDING, APPROVED, COMPLETED
-
+    private String status;
     @ManyToOne
     @JoinColumn(name = "lecturer_id")
     private Lecturers lecturer;

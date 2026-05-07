@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}"> <head>
+    <title>Admin - Smart Academic</title>
+    <style>
+        /* CSS để Sidebar nằm dưới Header và không đè lên Footer */
+        .admin-wrapper { display: flex; min-height: calc(100vh - 120px); width: 100%} /* Trừ chiều cao header/footer */
+
+        .sidebar {
+            width: 240px;
+            background: #2c3e50;
+            color: white;
+            flex-shrink: 0;
+            border-right: 1px solid #dee2e6;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 15px 25px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .sidebar .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+        .sidebar .nav-link.active {
+            background: #1a252f;
+            color: #fff;
+            border-left: 4px solid #3498db;
+        }
+
+        .admin-main-content {
+            flex-grow: 1;
+            padding: 25px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="admin-wrapper">
+        <div class="sidebar shadow-sm">
+            <div class="py-4 text-center border-bottom border-secondary mb-2">
+                <h6 class="fw-bold mb-0 text-white">CHỨC NĂNG QUẢN TRỊ</h6>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/layout}"
+                       th:classappend="${activePage == 'layout' ? 'active' : ''}">
+                        <i class="fas fa-chart-pie me-2"></i> Tổng quan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/equipment}"
+                       th:classappend="${activePage == 'equipment' ? 'active' : ''}">
+                        <i class="fas fa-laptop-code me-2"></i> Quản lý Thiết bị
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center"
+                       th:href="@{/admin/borrowing-requests}"
+                       th:classappend="${activePage == 'requests' ? 'active' : ''}">
+                        <span><i class="fas fa-tasks me-2"></i> Duyệt phiếu mượn</span>
+                        <span class="badge bg-danger rounded-pill" th:text="${pendingCount != null ? pendingCount : '0'}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/student-borrowing}"
+                       th:classappend="${activePage == 'students' ? 'active' : ''}">
+                        <i class="fas fa-user-graduate me-2"></i> Sinh viên mượn
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="admin-main-content">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold text-dark" layout:fragment="pageTitle">Tiêu đề</h3>
+                </div>
+                <div layout:fragment="adminContent">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

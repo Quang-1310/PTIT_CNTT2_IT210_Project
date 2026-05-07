@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Xác nhận hủy lịch | Smart Academic</title>
+</head>
+<body>
+
+<div layout:fragment="content" class="container narrow">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <i class="fas fa-calendar-times fa-4x mb-3 opacity-75"></i>
+                    <h3 class="mb-0">Hủy lịch tư vấn</h3>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <h5 class="text-danger mb-3" th:text="${session.lecturer.fullName}">Nguyễn Văn A</h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong th:text="${#temporals.format(session.dateTime, 'dd/MM/yyyy HH:mm')}">15/10/2024 14:00</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <p class="lead text-muted">
+                            Bạn có chắc chắn muốn <strong>hủy lịch</strong> này?
+                        </p>
+                        <div th:if="${canCancel}" class="text-success mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            ✅ Còn <strong th:text="${hoursToCancel} + ' giờ'">23 giờ</strong> để hủy (trước 24h)
+                        </div>
+                        <div th:unless="${canCancel}" class="text-danger mb-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            ❌ Quá hạn hủy (phải trước 24h)
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <form th:action="@{/student/schedule/cancel/{id}(id=${session.id})}" method="post" th:if="${canCancel}">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-check me-2"></i>Xác nhận hủy
+                            </button>
+                        </form>
+                        <a th:href="@{/student/history}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

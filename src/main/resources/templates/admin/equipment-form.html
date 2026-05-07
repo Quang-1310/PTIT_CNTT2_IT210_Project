@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+  <title th:text="${equipment.equipmentId == null ? 'Thêm thiết bị mới' : 'Chỉnh sửa thiết bị'}"></title>
+</head>
+<body>
+
+<th:block layout:fragment="pageTitle">
+  <span th:text="${equipment.equipmentId == null ? 'Thêm thiết bị mới' : 'Cập nhật thiết bị'}"></span>
+</th:block>
+
+<div layout:fragment="adminContent">
+  <!-- ✅ FLASH MESSAGES -->
+  <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+    <i class="fas fa-check-circle me-2"></i>[[${successMsg}]]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>[[${errorMsg}]]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <form th:action="@{/admin/equipment/save}" th:object="${equipment}" method="post" novalidate>
+        <input type="hidden" th:field="*{equipmentId}">
+        <input type="hidden" th:field="*{isDeleted}" />
+
+        <div class="row">
+          <!-- TÊN THIẾT BỊ -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Tên thiết bị <span class="text-danger">*</span></label>
+            <input type="text"
+                   class="form-control"
+                   th:field="*{equipmentName}"
+                   placeholder="Ví dụ: Máy chiếu Sony, Arduino Uno..."
+                   required>
+            <!-- ERROR DISPLAY -->
+            <div th:if="${#fields.hasErrors('equipmentName')}" class="invalid-feedback d-block">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <span th:errors="*{equipmentName}">Lỗi validation</span>
+            </div>
+          </div>
+
+          <!--  SỐ LƯỢNG -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Số lượng tồn kho <span class="text-danger">*</span></label>
+            <input type="number"
+                   class="form-control"
+                   th:field="*{stockQuantity}"
+                   min="0"
+                   placeholder="0"
+                   required>
+            <!-- ERROR DISPLAY -->
+            <div th:if="${#fields.hasErrors('stockQuantity')}" class="invalid-feedback d-block">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <span th:errors="*{stockQuantity}">Số lượng không hợp lệ</span>
+            </div>
+          </div>
+
+          <!-- KHOA -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Khoa quản lý <span class="text-danger">*</span></label>
+            <select class="form-select" th:field="*{department.deptId}">
+              <option value="">-- Chọn Khoa --</option>
+              <option th:each="dept : ${departments}"
+                      th:value="${dept.deptId}"
+                      th:text="${dept.deptName}"></option>
+            </select>
+            <!-- ERROR DISPLAY -->
+            <div th:if="${#fields.hasErrors('department')}" class="invalid-feedback d-block">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <span th:errors="*{department}">Vui lòng chọn Khoa</span>
+            </div>
+          </div>
+
+          <!--  PHÒNG LAB -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">Phòng Lab/Thực hành <span class="text-danger">*</span></label>
+            <select class="form-select" th:field="*{lab.labId}">
+              <option value="">-- Chọn Phòng Lab --</option>
+              <option th:each="l : ${labs}"
+                      th:value="${l.labId}"
+                      th:text="${l.labName}"></option>
+            </select>
+            <!-- ERROR DISPLAY -->
+            <div th:if="${#fields.hasErrors('lab')}" class="invalid-feedback d-block">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <span th:errors="*{lab}">Vui lòng chọn Phòng Lab</span>
+            </div>
+          </div>
+
+          <!--  MÔ TẢ -->
+          <div class="col-12 mb-4">
+            <label class="form-label fw-bold">Mô tả chi tiết</label>
+            <textarea class="form-control"
+                      th:field="*{description}"
+                      rows="4"
+                      placeholder="Nhập cấu hình, tình trạng thiết bị..."></textarea>
+            <!-- ERROR DISPLAY -->
+            <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback d-block">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <span th:errors="*{description}">Mô tả quá dài</span>
+            </div>
+          </div>
+        </div>
+
+        <!--  GLOBAL ERRORS -->
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger mb-3">
+          <ul class="mb-0">
+            <li th:each="err : ${#fields.allGlobalErrors()}" th:text="${err}"></li>
+          </ul>
+        </div>
+
+        <!--  BUTTONS -->
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+          <a th:href="@{/admin/equipment}" class="btn btn-light px-4">
+            <i class="fas fa-arrow-left me-2"></i>Hủy bỏ
+          </a>
+          <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <i class="fas fa-save me-2"></i>
+            <span th:text="${equipment.equipmentId == null ? 'Thêm mới' : 'Cập nhật'}"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

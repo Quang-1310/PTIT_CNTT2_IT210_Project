@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Đặt lịch cố vấn | Smart Academic</title>
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">
+            <i class="fas fa-calendar-plus text-primary me-2"></i>
+            Đặt lịch cố vấn học tập
+        </h4>
+        <a th:href="@{/student/history}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-history me-1"></i>Xem lịch sử
+        </a>
+    </div>
+
+    <!-- Form đặt lịch - 4 bước -->
+    <div class="row">
+        <div class="col-lg-8">
+            <form th:action="@{/student/schedule/book}" method="post" id="scheduleForm">
+                <input type="hidden" name="studentId" th:value="${currentUser.id}">
+
+                <!-- BƯỚC 1: Chọn Khoa -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-university me-2"></i>Bước 1: Chọn Khoa/Ngành
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6" th:each="dept : ${departments}">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="radio" name="departmentId"
+                                           th:value="${dept.deptId}" id="dept_${dept.deptId}" required>
+                                    <label class="form-check-label fw-bold"
+                                           th:for="dept_${dept.deptId}" th:text="${dept.deptName}">
+                                        CNTT
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: Chọn Giảng viên -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-user-tie me-2"></i>Bước 2: Chọn Giảng viên
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(lecturers)}" class="text-center py-4 text-muted">
+                            <i class="fas fa-users fa-3x mb-3 opacity-50"></i>
+                            <p>Chọn khoa để tải danh sách giảng viên</p>
+                        </div>
+                        <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(lecturers)}">
+                            <div th:each="lecturer : ${lecturers}" class="list-group-item px-0 border-end-0">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="lecturerId"
+                                           th:value="${lecturer.userId}" id="lect_${lecturer.userId}">
+                                    <label class="form-check-label w-100"
+                                           th:for="lect_${lecturer.userId}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong th:text="${lecturer.fullName}">Nguyễn Văn A</strong>
+                                                <small class="d-block text-muted"
+                                                       th:text="'Chuyên môn: ' + ${lecturer.specialization}">
+                                                    Web Development
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-success" th:text="${lecturer.availableSlots} + ' slots'">5 slots</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 3: Chọn thời gian -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Bước 3: Chọn thời gian (30p/khung)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ngày</label>
+                                <input type="datetime-local" class="form-control" name="scheduleDateTime"
+                                       id="scheduleDateTime" min th:value="${minDateTime}" required>
+                                <small class="text-danger" id="dateError" style="display:none;">
+                                    ⚠️ Không đặt lịch trong quá khứ!
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Khung giờ</label>
+                                <select class="form-select" name="timeSlot" id="timeSlot" required>
+                                    <option value="">-- Chọn giờ --</option>
+                                    <option value="08:00">08:00 - 08:30</option>
+                                    <option value="09:00">09:00 - 09:30</option>
+                                    <option value="10:00">10:00 - 10:30</option>
+                                    <option value="14:00">14:00 - 14:30</option>
+                                    <option value="15:00">15:00 - 15:30</option>
+                                    <option value="16:00">16:00 - 16:30</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Lưu ý:</strong> Hệ thống tự động kiểm tra xung đột lịch!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Submit -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg px-5" id="bookBtn" disabled>
+                        <i class="fas fa-calendar-check me-2"></i>
+                        ĐẶT LỊCH NGAY
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar: Quy tắc -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quy định đặt lịch</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Chống xung đột:</strong> Giảng viên chỉ tư vấn 1 sinh viên/khung giờ
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-ban text-danger me-2"></i>
+                            <strong>Không quá khứ:</strong> Chỉ đặt từ hiện tại trở đi
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock text-warning me-2"></i>
+                            <strong>Hủy trước 24h:</strong> Tránh phí hủy muộn
+                        </li>
+                        <li>
+                            <i class="fas fa-star text-primary me-2"></i>
+                            <strong>Thiết bị:</strong> Giảng viên sẽ chỉ định sau buổi học
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    $(document).ready(function() {
+        // Enable/disable button
+        $(":radio, select").on('change', function() {
+            let isValid = $('input[name="departmentId"]:checked').length > 0 &&
+                $('input[name="lecturerId"]:checked').length > 0 &&
+                $('#scheduleDateTime').val() &&
+                $('#timeSlot').val();
+            $('#bookBtn').prop('disabled', !isValid);
+        });
+
+        // Date validation (không quá khứ)
+        $('#scheduleDateTime').on('change', function() {
+            let selectedDate = new Date($(this).val());
+            let now = new Date();
+            now.setMinutes(now.getMinutes() - 1); // Grace period
+
+            if (selectedDate <= now) {
+                $('#dateError').show();
+                $(this).addClass('is-invalid');
+                $('#bookBtn').prop('disabled', true);
+            } else {
+                $('#dateError').hide();
+                $(this).removeClass('is-invalid');
+                // Re-check button
+                $(":radio, select").trigger('change');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

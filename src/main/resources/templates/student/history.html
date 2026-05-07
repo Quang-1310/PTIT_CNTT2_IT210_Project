@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Lịch sử học tập | Smart Academic</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>
+            <i class="fas fa-history text-primary me-2"></i>
+            Lịch sử học tập & Thiết bị mượn
+        </h4>
+        <a th:href="@{/student/schedule}" class="btn btn-outline-primary">
+            <i class="fas fa-calendar-plus me-1"></i>Đặt lịch mới
+        </a>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="historyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="sessions-tab" data-bs-toggle="tab"
+                    data-bs-target="#sessions" type="button">Buổi tư vấn</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="borrowed-tab" data-bs-toggle="tab"
+                    data-bs-target="#borrowed" type="button">Thiết bị mượn</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Tab 1: Buổi tư vấn (CORE-07) -->
+        <div class="tab-pane fade show active" id="sessions" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Ngày giờ</th>
+                                <th>Giảng viên</th>
+                                <th>Trạng thái</th>
+                                <th>Đánh giá</th>
+                                <th>Thiết bị</th>
+                                <th>Hành động</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="session : ${sessions}">
+                                <td>
+                                    <strong th:text="${#temporals.format(session.dateTime, 'dd/MM/yyyy HH:mm')}"></strong>
+                                </td>
+                                <td th:text="${session.lecturer.fullName}">Nguyễn Văn A</td>
+                                <td>
+                                    <span th:switch="${session.status}"
+                                          th:classappend="'badge ' +
+                                          ${session.status == 'HOÀN_THÀNH'} ? 'bg-success' :
+                                          ${session.status == 'HỦY'} ? 'bg-secondary' : 'bg-warning'">
+                                        <span th:case="'HOÀN_THÀNH'">✅ Hoàn thành</span>
+                                        <span th:case="'CHỜ_XÁC_NHẬN'">⏳ Chờ xác nhận</span>
+                                        <span th:case="'HỦY'">❌ Đã hủy</span>
+                                    </span>
+                                </td>
+                                <td th:text="${session.evaluation.rating} + '/10'">8/10</td>
+                                <td th:text="${session.borrowingDetails.size()} + ' items'">2 items</td>
+                                <td>
+                                    <th:block th:if="${session.status == 'CHỜ_XÁC_NHẬN'}">
+                                        <a th:href="@{/student/schedule/cancel/{id}(id=${session.id})}"
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Hủy lịch này?')">
+                                            <i class="fas fa-times"></i> Hủy
+                                        </a>
+                                    </th:block>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(sessions)}">
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                    <h5>Chưa có lịch tư vấn nào</h5>
+                                    <a th:href="@{/student/schedule}" class="btn btn-primary">Đặt lịch đầu tiên</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Thiết bị mượn (CORE-07) -->
+        <div class="tab-pane fade" id="borrowed" role="tabpanel">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Thiết bị</th>
+                                <th>Ngày mượn</th>
+                                <th>Trạng thái</th>
+                                <th>Số lượng</th>
+                                <th>Buổi học</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="record : ${borrowingRecords}">
+                                <td th:text="${record.equipment.equipmentName}">Laptop Dell</td>
+                                <td th:text="${#temporals.format(record.borrowDate, 'dd/MM/yyyy')}">15/10</td>
+                                <td>
+                                    <span th:text="${record.status}">Đã xuất</span>
+                                </td>
+                                <td th:text="${record.quantity}">1</td>
+                                <td th:text="${record.session.lecturer.fullName}">Nguyễn Văn A</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
