@@ -47,13 +47,19 @@ public class StudentController {
             return "redirect:/auth/login";
         }
 
-        ScheduleFormDTO formDTO = new ScheduleFormDTO();
-
-        if (deptId != null) {
-            formDTO.setDepartmentId(deptId);
+        if (!model.containsAttribute("scheduleForm")) {
+            ScheduleFormDTO formDTO = new ScheduleFormDTO();
+            if (deptId != null) {
+                formDTO.setDepartmentId(deptId);
+            }
+            model.addAttribute("scheduleForm", formDTO);
         }
-
-        model.addAttribute("scheduleForm", formDTO);
+        else {
+            ScheduleFormDTO existingForm = (ScheduleFormDTO) model.asMap().get("scheduleForm");
+            if (deptId != null) {
+                existingForm.setDepartmentId(deptId);
+            }
+        }
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("departments", departmentService.findAll());
@@ -73,36 +79,36 @@ public class StudentController {
             RedirectAttributes redirectAttributes) {
 
         if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Vui lòng kiểm tra thông tin form!");
-            return "redirect:/student/schedule?error";
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.scheduleForm", result);
+            redirectAttributes.addFlashAttribute("scheduleForm", form);
+            redirectAttributes.addFlashAttribute("errorMsg", "Vui lòng điền đầy đủ thông tin!");
+            return "redirect:/student/schedule?deptId=" + form.getDepartmentId();
         }
 
         Users currentUser = getCurrentUserFromSession(session);
-        if (currentUser == null) {
-            return "redirect:/login";
-        }
+        if (currentUser == null) return "redirect:/auth/login";
 
         try {
-            if (form.getStartTime().isBefore(LocalDateTime.now())) {
+            LocalDateTime startTime = LocalDateTime.of(form.getBookingDate(), form.getBookingTime());
+            LocalDateTime endTime = startTime.plusMinutes(30);
+
+            if (startTime.isBefore(LocalDateTime.now())) {
                 redirectAttributes.addFlashAttribute("errorMsg", "Không thể đặt lịch trong quá khứ!");
-                return "redirect:/student/schedule?error";
+                redirectAttributes.addFlashAttribute("scheduleForm", form);
+                return "redirect:/student/schedule?deptId=" + form.getDepartmentId();
             }
 
-            LocalDateTime endTime = form.getStartTime().plusMinutes(30);
-            if (sessionService.hasConflict(form.getLecturerId(), form.getStartTime(), endTime)) {
-                redirectAttributes.addFlashAttribute("errorMsg",
-                        "Giảng viên đã có lịch trong khung giờ này! Vui lòng chọn giờ khác.");
-                return "redirect:/student/schedule?error";
+            if (sessionService.hasConflict(form.getLecturerId(), startTime, endTime)) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Giảng viên đã có lịch trong khung giờ này!");
+                redirectAttributes.addFlashAttribute("scheduleForm", form);
+                return "redirect:/student/schedule?deptId=" + form.getDepartmentId();
             }
 
             sessionService.createSession(form, currentUser.getUserId());
-            redirectAttributes.addFlashAttribute("successMsg",
-                    " Đặt lịch thành công! Chờ giảng viên xác nhận trong 24h.");
+            redirectAttributes.addFlashAttribute("successMsg", "Đặt lịch thành công!");
 
-        } catch (EntityNotFoundException e) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Giảng viên không tồn tại!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMsg", "Lỗi hệ thống: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -165,8 +171,10 @@ public class StudentController {
             return "redirect:/auth/login";
         }
 
-        model.addAttribute("sessions", sessionService.findStudentHistory(currentUser.getUserId()));
-        model.addAttribute("borrowingRecords", List.of());
+        List<MentoringSessions> historyList = sessionService.findStudentHistory(currentUser.getUserId());
+
+        model.addAttribute("sessions", historyList);
+        model.addAttribute("loginUser", currentUser);
         return "student/history";
     }
 

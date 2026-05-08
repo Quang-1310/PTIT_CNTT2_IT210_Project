@@ -140,7 +140,7 @@ public class AdminController {
     public String deleteEquipment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             equipmentService.deleteEquipment(id);
-            redirectAttributes.addFlashAttribute("successMsg", "🗑️ Xóa thiết bị thành công!");
+            redirectAttributes.addFlashAttribute("successMsg", "🗑Xóa thiết bị thành công!");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
         } catch (Exception e) {

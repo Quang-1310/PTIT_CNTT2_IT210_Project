@@ -6,8 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Builder
@@ -20,7 +23,11 @@ public class ScheduleFormDTO {
     @NotNull(message = "Chọn giảng viên")
     private Long lecturerId;
 
-    @NotNull(message = "Chọn thời gian")
-    @FutureOrPresent(message = "Không đặt lịch trong quá khứ")
-    private LocalDateTime startTime;
+    @NotNull(message = "Chọn ngày")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate bookingDate;
+
+    @NotNull(message = "Chọn khung giờ")
+    @DateTimeFormat(pattern = "HH:mm")
+    private LocalTime bookingTime;
 }

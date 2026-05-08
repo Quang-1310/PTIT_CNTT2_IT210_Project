@@ -45,12 +45,14 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
         Users student = userRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Sinh viên không tồn tại ID: " + studentId));
 
-        LocalDateTime endTime = form.getStartTime().plusMinutes(30);
+        LocalDateTime startTime = LocalDateTime.of(form.getBookingDate(), form.getBookingTime());
+
+        LocalDateTime endTime = startTime.plusMinutes(30);
 
         MentoringSessions session = new MentoringSessions();
         session.setLecturer(lecturer);
         session.setStudent(student);
-        session.setStartTime(form.getStartTime());
+        session.setStartTime(startTime);
         session.setEndTime(endTime);
         session.setStatus("PENDING");
 

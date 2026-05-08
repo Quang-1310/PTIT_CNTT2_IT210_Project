@@ -40,7 +40,6 @@
     </div>
 
     <div class="row">
-
         <!-- FORM -->
         <div class="col-lg-8">
 
@@ -65,7 +64,7 @@
                             Chọn khoa/ngành
                         </label>
 
-                        <select class="form-select" id="departmentId" th:field="*{departmentId}"
+                        <select class="form-select" id="departmentSelect"
                                 onchange="location.href='/student/schedule?deptId=' + this.value">
                             <option value="">-- Chọn khoa --</option>
                             <option th:each="d : ${departments}"
@@ -74,12 +73,11 @@
                                     th:selected="${param.deptId != null and param.deptId[0] == #strings.toString(d.deptId)}">
                             </option>
                         </select>
+                        <div class="error-message mt-1" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></div>
 
                     </div>
 
-                    <!-- hidden field -->
-<!--                    <input type="hidden"-->
-<!--                           th:field="*{departmentId}">-->
+                    <input type="hidden" id="departmentId" th:field="*{departmentId}">
 
                     <!-- CHỌN GIẢNG VIÊN -->
                     <div class="mb-4">
@@ -90,7 +88,7 @@
 
                         <select class="form-select"
                                 th:field="*{lecturerId}"
-                                required>
+                                id="lecturerId">
 
                             <option value="">
                                 -- Chọn giảng viên --
@@ -102,69 +100,42 @@
                             </option>
 
                         </select>
+                        <div class="error-message mt-1" th:if="${#fields.hasErrors('lecturerId')}" th:errors="*{lecturerId}"></div>
 
                     </div>
 
-                    <!-- CHỌN NGÀY -->
                     <div class="mb-4">
-
-                        <label class="form-label fw-bold">
-                            Chọn ngày
-                        </label>
-
+                        <label class="form-label fw-bold">Chọn ngày</label>
                         <input type="date"
                                class="form-control"
                                id="bookingDate"
-                               required>
-
+                               name="bookingDate"
+                               th:value="${scheduleForm.bookingDate}">
+                        <div class="error-message mt-1" th:if="${#fields.hasErrors('bookingDate')}" th:errors="*{bookingDate}"></div>
                     </div>
 
-                    <!-- CHỌN GIỜ -->
                     <div class="mb-4">
-
-                        <label class="form-label fw-bold">
-                            Chọn khung giờ
-                        </label>
-
+                        <label class="form-label fw-bold">Chọn khung giờ</label>
                         <select class="form-select"
                                 id="timeSlot"
-                                required>
-
-                            <option value="">
-                                -- Chọn giờ --
-                            </option>
-
-                            <option value="08:00">
-                                08:00 - 08:30
-                            </option>
-
-                            <option value="08:30">
-                                08:30 - 09:00
-                            </option>
-
-                            <option value="09:00">
-                                09:00 - 09:30
-                            </option>
-
-                            <option value="14:00">
-                                14:00 - 14:30
-                            </option>
-
-                            <option value="14:30">
-                                14:30 - 15:00
-                            </option>
-
-                            <option value="15:00">
-                                15:00 - 15:30
-                            </option>
+                                name="bookingTime">
+                            <option value="">-- Chọn giờ --</option>
+                            <option value="08:00" th:selected="${scheduleForm.bookingTime?.toString() == '08:00'}">08:00 - 08:30</option>
+                            <option value="08:30" th:selected="${scheduleForm.bookingTime?.toString() == '08:30'}">08:30 - 09:00</option>
+                            <option value="09:00" th:selected="${scheduleForm.bookingTime?.toString() == '09:00'}">09:00 - 09:30</option>
+                            <option value="09:30" th:selected="${scheduleForm.bookingTime?.toString() == '09:30'}">09:30 - 10:00</option>
+                            <option value="10:00" th:selected="${scheduleForm.bookingTime?.toString() == '10:00'}">10:00 - 10:30</option>
+                            <option value="10:30" th:selected="${scheduleForm.bookingTime?.toString() == '10:30'}">10:30 - 11:00</option>
+                            <option value="14:00" th:selected="${scheduleForm.bookingTime?.toString() == '14:00'}">14:00 - 14:30</option>
+                            <option value="14:30" th:selected="${scheduleForm.bookingTime?.toString() == '14:30'}">14:30 - 15:00</option>
+                            <option value="15:00" th:selected="${scheduleForm.bookingTime?.toString() == '15:00'}">15:00 - 15:30</option>
+                            <option value="15:30" th:selected="${scheduleForm.bookingTime?.toString() == '15:30'}">15:30 - 16:00</option>
+                            <option value="16:00" th:selected="${scheduleForm.bookingTime?.toString() == '16:00'}">16:00 - 16:30</option>
+                            <option value="16:30" th:selected="${scheduleForm.bookingTime?.toString() == '16:30'}">16:30 - 17:00</option>
 
                         </select>
-
+                        <div class="error-message mt-1" th:if="${#fields.hasErrors('bookingTime')}" th:errors="*{bookingTime}"></div>
                     </div>
-
-                    <!-- hidden startTime -->
-                    <input type="hidden"
-                           th:field="*{startTime}">
 
                     <!-- BUTTON -->
                     <div class="text-center mt-4">
@@ -231,10 +202,10 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         const deptSelect = document.getElementById("departmentSelect");
-        const deptHidden = document.getElementById("departmentId"); // ID do th:field="*{departmentId}" tạo ra
+        const deptHidden = document.getElementById("departmentId");
         const dateInput = document.getElementById("bookingDate");
         const timeSelect = document.getElementById("timeSlot");
-        const startHidden = document.getElementById("startTime");   // ID do th:field="*{startTime}" tạo ra
+        const startHidden = document.getElementById("finalStartTime");
 
         // 1. Đồng bộ Khoa từ URL vào Form
         const urlParams = new URLSearchParams(window.location.search);
@@ -251,24 +222,15 @@
             }
         });
 
-        // 3. Ghép Ngày + Giờ -> LocalDateTime
-        function updateFinalDateTime() {
-            if (dateInput.value && timeSelect.value) {
-                // Format: yyyy-MM-ddTHH:mm:00
-                startHidden.value = dateInput.value + "T" + timeSelect.value + ":00";
-                console.log("StartTime chuẩn bị gửi:", startHidden.value);
-            }
-        }
-
-        dateInput.addEventListener("change", updateFinalDateTime);
-        timeSelect.addEventListener("change", updateFinalDateTime);
-
-        // 4. Kiểm tra dữ liệu trước khi Submit
         document.querySelector("form").addEventListener("submit", function (e) {
-            // Đảm bảo deptHidden luôn có giá trị mới nhất từ select
+            // Đảm bảo đồng bộ ID khoa
             deptHidden.value = deptSelect.value;
 
-            if (!deptHidden.value || !startHidden.value || !document.getElementById("lecturerId").value) {
+            const dateVal = document.getElementById("bookingDate").value;
+            const timeVal = document.getElementById("timeSlot").value;
+            const lecturerVal = document.getElementById("lecturerId").value;
+
+            if (!deptHidden.value || !dateVal || !timeVal || !lecturerVal) {
                 alert("Vui lòng điền đầy đủ thông tin trước khi đặt lịch!");
                 e.preventDefault();
             }
