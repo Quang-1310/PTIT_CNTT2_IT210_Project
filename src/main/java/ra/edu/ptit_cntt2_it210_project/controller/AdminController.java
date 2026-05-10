@@ -221,4 +221,18 @@ public class AdminController {
             return "redirect:/admin/add-lecturer";
         }
     }
+
+    @GetMapping("/departments")
+    public String listDepartments(Model model) {
+        model.addAttribute("activePage", "departments");
+        model.addAttribute("departments", departmentService.findAll());
+        return "admin/departments";
+    }
+
+    @GetMapping("/labs")
+    public String listLabs(Model model) {
+        model.addAttribute("activePage", "labs");
+        model.addAttribute("labs", labService.findAll());
+        return "admin/labs";
+    }
 }

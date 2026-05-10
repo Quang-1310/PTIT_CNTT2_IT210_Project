@@ -179,6 +179,21 @@ public class StudentController {
         return "student/history";
     }
 
+    @GetMapping("/schedule/evaluation/{id}")
+    public String viewEvaluationDetail(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        MentoringSessions session = sessionService.findById(id);
+
+        if (session == null) {
+            ra.addFlashAttribute("errorMsg", "Không tìm thấy thông tin buổi tư vấn!");
+            return "redirect:/student/history";
+        }
+
+        model.addAttribute("sessionCurrent", session);
+
+
+        return "student/view-evaluation";
+    }
+
     private Users getCurrentUserFromSession(HttpSession session) {
         return (Users) session.getAttribute("loginUser");
     }

@@ -72,6 +72,18 @@
                         <i class="fas fa-user-graduate me-2"></i> Thêm tài khoản
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/departments}"
+                       th:classappend="${activePage == 'departments' ? 'active' : ''}">
+                        <i class="fas fa-user-graduate me-2"></i> Khoa/Ngành
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/labs}"
+                       th:classappend="${activePage == 'labs' ? 'active' : ''}">
+                        <i class="fas fa-user-graduate me-2"></i> Phòng Lab
+                    </a>
+                </li>
             </ul>
         </div>
 

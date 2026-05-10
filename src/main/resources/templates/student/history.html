@@ -63,7 +63,7 @@
                         </td>
                         <td>
                             <a th:if="${s.status == 'COMPLETED'}"
-                               href="javascript:void(0)"
+                               th:href="@{/student/schedule/evaluation/{id}(id=${s.sessionId})}"
                                class="btn btn-sm btn-outline-primary" title="Viết đánh giá">
                                 <i class="fas fa-pen"></i> Xem đánh giá
                             </a>

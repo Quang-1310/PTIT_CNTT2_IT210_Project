@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Danh sách phòng Lab | Admin</title>
+</head>
+<body>
+<div layout:fragment="adminContent">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-primary"><i class="fas fa-flask me-2"></i>Danh sách Phòng Lab</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Tên Phòng Lab</th>
+                    <th>Thuộc Khoa</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="lab : ${labs}">
+                    <td class="ps-4" th:text="${lab.labId}">1</td>
+                    <td>
+                        <span class="badge bg-light text-dark border px-3" th:text="${lab.labName}">Lab Name</span>
+                    </td>
+                    <td th:text="${lab.department != null ? lab.department.deptName : 'Chưa phân khoa'}">Tên Khoa</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(labs)}">
+                    <td colspan="4" class="text-center py-4 text-muted">Không tìm thấy phòng lab nào.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

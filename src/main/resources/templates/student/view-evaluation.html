@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout/base}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title>Chi tiết đánh giá | Smart Academic</title>
+    <style>
+        .info-label { color: #6c757d; font-size: 0.85rem; text-uppercase: uppercase; font-weight: 600; }
+        .info-value { font-weight: 500; color: #212529; }
+        .card-evaluation { border-left: 5px solid #198754; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4 mb-5">
+        <nav aria-label="breadcrumb" class="mb-4 d-flex justify-content-between align-items-center">
+            <a th:href="@{/student/history}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fs-6"><i class="fas fa-calendar-check me-2"></i>Thông tin buổi tư vấn</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="info-label d-block">Giảng viên hướng dẫn</label>
+                            <span class="info-value" th:text="${sessionCurrent.lecturer.user.profile.fullName}">Nguyễn Văn A</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="info-label d-block">Khoa / Bộ môn</label>
+                            <span class="info-value" th:text="${sessionCurrent.department.deptName}">Công nghệ thông tin</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="info-label d-block">Thời gian diễn ra</label>
+                            <span class="info-value">
+                                <i class="far fa-clock me-1 text-primary"></i>
+                                <span th:text="${#temporals.format(sessionCurrent.startTime, 'HH:mm')}">08:00</span> -
+                                <span th:text="${#temporals.format(sessionCurrent.endTime, 'HH:mm')}">09:00</span>
+                                <div class="small text-muted" th:text="${#temporals.format(sessionCurrent.startTime, 'dd/MM/yyyy')}">10/05/2026</div>
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="info-label d-block">Phòng Lab chỉ định</label>
+                            <span class="badge bg-info text-dark fw-bold"
+                                  th:text="${sessionCurrent.evaluation != null ? sessionCurrent.evaluation.assignedLab : 'Chưa cập nhật'}">
+                                Phòng Lab
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="mb-0 fs-6"><i class="fas fa-tools me-2"></i>Thiết bị mượn kèm</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 shadow-none">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Thiết bị</th>
+                                <th class="text-center">SL</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="detail : ${sessionCurrent.borrowingRecord?.details}">
+                                <td class="ps-3" th:text="${detail.equipment.equipmentName}">Thiết bị A</td>
+                                <td class="text-center fw-bold" th:text="${detail.quantity}">1</td>
+                            </tr>
+                            <tr th:if="${sessionCurrent.borrowingRecord == null || #lists.isEmpty(sessionCurrent.borrowingRecord.details)}">
+                                <td colspan="2" class="text-center py-4 text-muted small">
+                                    <i class="fas fa-info-circle me-1"></i> Không có thiết bị đi kèm
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 card-evaluation h-100">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 text-success"><i class="fas fa-comment-dots me-2"></i>Kết quả đánh giá</h5>
+                            <span class="badge bg-success">COMPLETED</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div th:if="${sessionCurrent.evaluation != null}">
+                            <div class="evaluation-content p-3 rounded bg-light mb-4" style="min-height: 200px; border: 1px dashed #dee2e6;">
+                                <p class="text-dark" style="white-space: pre-line; line-height: 1.6;"
+                                   th:text="${sessionCurrent.evaluation.assessment}">
+                                    Nội dung đánh giá chuyên môn từ giảng viên sẽ hiển thị tại đây.
+                                </p>
+                            </div>
+
+                            <div class="d-flex align-items-center text-muted small mt-auto">
+                                <div class="me-4">
+                                    <i class="far fa-calendar-check me-1"></i> Ngày đánh giá:
+                                    <strong th:text="${#temporals.format(sessionCurrent.evaluation.evaluationDate, 'dd/MM/yyyy HH:mm')}">10/05/2026</strong>
+                                </div>
+                                <div>
+                                    <i class="fas fa-user-check me-1"></i> Người đánh giá:
+                                    <strong th:text="${sessionCurrent.lecturer.user.profile.fullName}">Giảng viên</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:unless="${sessionCurrent.evaluation != null}" class="text-center py-5">
+                            <img src="https://cdn-icons-png.flaticon.com/512/5058/5058436.png" width="120" class="opacity-25 mb-3" alt="No data">
+                            <h6 class="text-muted">Giảng viên chưa cập nhật nội dung đánh giá.</h6>
+                            <p class="small text-secondary">Vui lòng quay lại sau hoặc liên hệ trực tiếp giảng viên.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
