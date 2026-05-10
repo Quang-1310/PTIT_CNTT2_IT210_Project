@@ -16,6 +16,7 @@ public class MentoringSessions {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
+
     @ManyToOne
     @JoinColumn(name = "lecturer_id")
     private Lecturers lecturer;
@@ -23,4 +24,10 @@ public class MentoringSessions {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Users student;
+
+    @OneToOne(mappedBy = "mentoringSession", cascade = CascadeType.ALL)
+    private AcademicEvaluations evaluation;
+
+    @OneToOne(mappedBy = "mentoringSession", cascade = CascadeType.ALL)
+    private BorrowingRecords borrowingRecord;
 }

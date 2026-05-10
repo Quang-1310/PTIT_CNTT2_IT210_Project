@@ -1,21 +1,36 @@
 package ra.edu.ptit_cntt2_it210_project.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ra.edu.ptit_cntt2_it210_project.model.entity.Lecturers;
-import ra.edu.ptit_cntt2_it210_project.repository.LecturerRepository;
+import ra.edu.ptit_cntt2_it210_project.model.entity.*;
+import ra.edu.ptit_cntt2_it210_project.repository.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 public class LecturerServiceImpl implements LecturerService {
 
     private final LecturerRepository lecturerRepository;
+    private final MentoringSessionRepository sessionRepository;
+    private final AcademicEvaluationRepository evaluationRepository;
+    private final BorrowingRecordRepository borrowingRepository;
+    private final EquipmentRepository equipmentRepository;
 
-    public LecturerServiceImpl(LecturerRepository lecturerRepository) {
+    public LecturerServiceImpl(LecturerRepository lecturerRepository,MentoringSessionRepository sessionRepository,
+                               AcademicEvaluationRepository evaluationRepository,
+                               BorrowingRecordRepository borrowingRepository,
+                               EquipmentRepository equipmentRepository) {
         this.lecturerRepository = lecturerRepository;
+        this.sessionRepository = sessionRepository;
+        this.evaluationRepository = evaluationRepository;
+        this.borrowingRepository = borrowingRepository;
+        this.equipmentRepository = equipmentRepository;
     }
 
     @Override
@@ -38,5 +53,49 @@ public class LecturerServiceImpl implements LecturerService {
     public Lecturers findByUserId(Long userId) {
         return lecturerRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Giảng viên không tồn tại userId: " + userId));
+    }
+
+    @Override
+    public Page<MentoringSessions> findPendingByLecturer(Long lecturerId, Pageable pageable) {
+        return lecturerRepository.findPendingByLecturer(lecturerId, pageable);
+    }
+
+    @Override
+    @Transactional
+    public void completeAssessment(Long sessionId, String assessment, String labRoom, List<Long> equipmentIds) {
+        MentoringSessions session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy ca tư vấn"));
+
+        if (!"PENDING".equals(session.getStatus()) && !"CONFIRMED".equals(session.getStatus())) {
+            throw new IllegalStateException("Ca tư vấn này không ở trạng thái có thể đánh giá");
+        }
+
+        AcademicEvaluations eval = new AcademicEvaluations();
+        eval.setAssessment(assessment);
+        eval.setAssignedLab(labRoom);
+        eval.setEvaluationDate(LocalDateTime.now());
+        eval.setMentoringSession(session);
+        evaluationRepository.save(eval);
+
+        if (equipmentIds != null && !equipmentIds.isEmpty()) {
+            BorrowingRecords record = new BorrowingRecords();
+            record.setBorrowDate(LocalDateTime.now());
+            record.setStatus("WAITING_FOR_DELIVERY");
+            record.setMentoringSession(session);
+
+            List<BorrowingDetails> details = equipmentIds.stream().map(id -> {
+                BorrowingDetails d = new BorrowingDetails();
+                d.setEquipment(equipmentRepository.getReferenceById(id));
+                d.setBorrowingRecord(record);
+                d.setQuantity(1);
+                return d;
+            }).collect(Collectors.toList());
+
+            record.setDetails(details);
+            borrowingRepository.save(record);
+        }
+
+        session.setStatus("CONFIRMED");
+        sessionRepository.save(session);
     }
 }

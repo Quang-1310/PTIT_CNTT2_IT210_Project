@@ -22,6 +22,11 @@ public class EquipmentServiceImpl implements EquipmentService{
     }
 
     @Override
+    public List<Equipments> findAllActiveDefault() {
+        return equipmentRepository.findAllActiveDefault();
+    }
+
+    @Override
     public Page<Equipments> searchByName(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return findAll(pageable);

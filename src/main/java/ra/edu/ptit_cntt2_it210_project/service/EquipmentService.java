@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface EquipmentService {
     Page<Equipments> findAll(Pageable pageable);
+    List<Equipments> findAllActiveDefault();
     Equipments addEquipment(Equipments newEquipment);
     void updateEquipment(Equipments equipment);
     void deleteEquipment(Long equipmentId);

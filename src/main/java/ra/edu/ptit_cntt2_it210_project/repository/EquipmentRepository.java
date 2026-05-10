@@ -17,7 +17,7 @@ public interface EquipmentRepository extends JpaRepository<Equipments, Long> {
     Integer getTotalStockById(@Param("id") Long id);
 
     @Query("SELECT e FROM Equipments e WHERE e.isDeleted = false")
-    List<Equipments> findAllActive();
+    List<Equipments> findAllActiveDefault();
 
     @Query("SELECT e FROM Equipments e WHERE e.isDeleted = false")
     Page<Equipments> findAllActive(Pageable pageable);

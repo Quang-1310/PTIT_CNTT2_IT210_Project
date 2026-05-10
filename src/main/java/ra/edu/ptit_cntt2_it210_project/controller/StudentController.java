@@ -14,7 +14,6 @@ import ra.edu.ptit_cntt2_it210_project.model.entity.Users;
 import ra.edu.ptit_cntt2_it210_project.service.DepartmentService;
 import ra.edu.ptit_cntt2_it210_project.service.LecturerService;
 import ra.edu.ptit_cntt2_it210_project.service.MentoringSessionService;
-import ra.edu.ptit_cntt2_it210_project.service.UserService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -109,7 +108,6 @@ public class StudentController {
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
-            e.printStackTrace();
         }
 
         return "redirect:/student/history";
@@ -133,9 +131,12 @@ public class StudentController {
                 redirectAttributes.addFlashAttribute("errorMsg", "Quá hạn hủy (phải trước 24h)!");
                 return "redirect:/student/history?error=too_late";
             }
-            model.addAttribute("session", sessionEntity);
-            return "student/cancel-confirm";
-        } catch (Exception e) {
+            long hoursToCancel = java.time.Duration.between(LocalDateTime.now(), sessionEntity.getStartTime()).toHours();
+            model.addAttribute("sessionEntity", sessionEntity);
+            model.addAttribute("canCancel", sessionService.canCancel(sessionEntity));
+            model.addAttribute("hoursToCancel", hoursToCancel);
+            return "student/cancel";
+        } catch (EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMsg", "Lịch không tồn tại hoặc không thuộc bạn!");
             return "redirect:/student/history";
         }
@@ -149,7 +150,7 @@ public class StudentController {
 
         Users currentUser = getCurrentUserFromSession(session);
         if (currentUser == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {

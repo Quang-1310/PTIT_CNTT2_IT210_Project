@@ -16,10 +16,10 @@
                 </div>
                 <div class="card-body p-5 text-center">
                     <div class="mb-4">
-                        <h5 class="text-danger mb-3" th:text="${session.lecturer.fullName}">Nguyễn Văn A</h5>
+                        <h5 class="text-danger mb-3" th:text="${sessionEntity.getLecturer().getUser().getProfile().getFullName()}">Nguyễn Văn A</h5>
                         <div class="alert alert-warning">
                             <i class="fas fa-clock me-2"></i>
-                            <strong th:text="${#temporals.format(session.dateTime, 'dd/MM/yyyy HH:mm')}">15/10/2024 14:00</strong>
+                            <strong th:text="${#temporals.format(sessionEntity.startTime, 'dd/MM/yyyy HH:mm')}">Thời gian</strong>
                         </div>
                     </div>
 
@@ -29,16 +29,16 @@
                         </p>
                         <div th:if="${canCancel}" class="text-success mb-3">
                             <i class="fas fa-check-circle me-2"></i>
-                            ✅ Còn <strong th:text="${hoursToCancel} + ' giờ'">23 giờ</strong> để hủy (trước 24h)
+                             Còn <strong th:text="${hoursToCancel} + ' giờ'">23 giờ</strong> để hủy (trước 24h)
                         </div>
                         <div th:unless="${canCancel}" class="text-danger mb-3">
                             <i class="fas fa-times-circle me-2"></i>
-                            ❌ Quá hạn hủy (phải trước 24h)
+                             Quá hạn hủy (phải trước 24h)
                         </div>
                     </div>
 
                     <div class="d-grid gap-3">
-                        <form th:action="@{/student/schedule/cancel/{id}(id=${session.id})}" method="post" th:if="${canCancel}">
+                        <form th:action="@{/student/schedule/cancel/{id}(id=${sessionEntity.sessionId})}" method="post" th:if="${canCancel}">
                             <button type="submit" class="btn btn-danger btn-lg">
                                 <i class="fas fa-check me-2"></i>Xác nhận hủy
                             </button>

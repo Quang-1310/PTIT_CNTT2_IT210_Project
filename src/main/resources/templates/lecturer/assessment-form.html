@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+<!--    <meta charset="utf-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+
+<!--    &lt;!&ndash; Bootstrap CSS &ndash;&gt;-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"-->
+<!--          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
+</head>
+<body>
+
+<div layout:fragment="content" class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Hoàn tất ca tư vấn & Đánh giá</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/lecturer/assessment/submit}" th:object="${assessmentDTO}" method="post">
+                <input type="hidden" th:field="*{sessionId}">
+
+                <!-- Thông tin ca tư vấn -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Sinh viên:</strong> <span th:text="${sessionCurrent.student.profile.fullName}"></span></p>
+                    </div>
+                    <div class="col-md-6 text-end text-muted">
+                        <i class="far fa-clock"></i> <span th:text="${#temporals.format(sessionCurrent.startTime, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                </div>
+
+                <!-- CORE-06: Đánh giá năng lực -->
+                <div class="mb-3">
+                    <label for="assessment" class="form-label fw-bold">Nội dung đánh giá năng lực:</label>
+                    <textarea id="assessment" th:field="*{assessment}" class="form-control" rows="4" placeholder="Nhập nhận xét về sinh viên..."></textarea>
+                    <div class="text-danger" th:if="${#fields.hasErrors('assessment')}" th:errors="*{assessment}"></div>
+                </div>
+
+                <div class="row">
+                    <!-- Chỉ định phòng Lab -->
+                    <div class="col-md-6 mb-3">
+                        <label for="labRoom" class="form-label fw-bold">Chỉ định phòng Lab:</label>
+                        <select id="labRoom" th:field="*{labRoom}" class="form-select">
+                            <option value="">-- Chọn phòng --</option>
+                            <option th:each="l : ${labs}"
+                                    th:value="${l.labName}"
+                                    th:text="${l.labName}">
+                            </option>
+                        </select>
+                        <div class="text-danger"
+                             th:if="${#fields.hasErrors('labRoom')}"
+                             th:errors="*{labRoom}">
+                        </div>
+                    </div>
+
+                    <!-- CORE-08: Chọn thiết bị -->
+                    <div class="col-md-6 mb-3">
+                        <label for="equipmentIds" class="form-label fw-bold">Thiết bị cấp phát:</label>
+                        <select id="equipmentIds" th:field="*{equipmentIds}" class="form-select" multiple size="4">
+                            <option th:each="e : ${equipments}"
+                                    th:value="${e.equipmentId}"
+                                    th:text="${e.equipmentName}">
+                            </option>
+                        </select>
+                        <small class="text-muted">Giữ Ctrl để chọn nhiều thiết bị</small>
+                    </div>
+                </div>
+
+                <div class="text-end mt-3">
+                    <a th:href="@{/lecturer/home}" class="btn btn-secondary">Quay lại</a>
+                    <button type="submit" class="btn btn-success px-4">
+                        <i class="fas fa-save me-1"></i> Xác nhận hoàn tất
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

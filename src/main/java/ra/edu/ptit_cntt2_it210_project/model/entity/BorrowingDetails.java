@@ -5,6 +5,11 @@ import lombok.*;
 
 @Entity
 @Table(name = "borrowing_details")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 public class BorrowingDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
