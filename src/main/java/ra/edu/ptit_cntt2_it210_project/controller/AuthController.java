@@ -40,6 +40,13 @@ public class AuthController {
             return "auth/register";
         }
 
+        if (userService.existsByEmail(registerDTO.getEmail())) {
+            model.addAttribute("registerDTO", registerDTO);
+            model.addAttribute("activePage", "add-lecturer");
+            model.addAttribute("emailExists", true);
+            return "admin/add-lecturer";
+        }
+
         Users user = new Users();
         user.setEmail(registerDTO.getEmail());
         user.setPassword(userService.hash(registerDTO.getPassword()));
@@ -85,7 +92,7 @@ public class AuthController {
 
             Role role = user.getRole();
             if (role == Role.ADMIN) {
-                return "redirect:/admin/layout";
+                return "redirect:/admin/overview";
             } else if (role == Role.LECTURER) {
                 return "redirect:/lecturer/home";
             } else {  // STUDENT

@@ -18,8 +18,8 @@ public class AssessmentDTO {
     @NotBlank(message = "Nội dung đánh giá không được để trống")
     private String assessment;
 
-    @NotBlank(message = "Vui lòng chỉ định phòng Lab")
-    private String labRoom;
+    @NotNull(message = "Vui lòng chọn phòng Lab")
+    private Long labId;
 
     private List<Long> equipmentIds;
 }

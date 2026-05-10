@@ -110,6 +110,10 @@
                                    placeholder="example@student.ptit.edu.vn">
                         </div>
                         <div class="error-message mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        <div th:if="${emailExists}" class="alert alert-warning small mt-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Email <strong th:text="${registerDTO.email}"></strong> đã tồn tại!
+                        </div>
                     </div>
 
                     <!-- Số điện thoại -->

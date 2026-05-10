@@ -1,15 +1,13 @@
 package ra.edu.ptit_cntt2_it210_project.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ra.edu.ptit_cntt2_it210_project.model.dto.ScheduleFormDTO;
-import ra.edu.ptit_cntt2_it210_project.model.entity.Lecturers;
-import ra.edu.ptit_cntt2_it210_project.model.entity.MentoringSessions;
-import ra.edu.ptit_cntt2_it210_project.model.entity.Users;
-import ra.edu.ptit_cntt2_it210_project.repository.LecturerRepository;
-import ra.edu.ptit_cntt2_it210_project.repository.MentoringSessionRepository;
-import ra.edu.ptit_cntt2_it210_project.repository.UserRepository;
+import ra.edu.ptit_cntt2_it210_project.model.entity.*;
+import ra.edu.ptit_cntt2_it210_project.repository.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -23,13 +21,17 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
     private final MentoringSessionRepository sessionRepository;
     private final LecturerRepository lecturerRepository;
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
 
     public MentoringSessionServiceImpl(MentoringSessionRepository sessionRepository,
                                        LecturerRepository lecturerRepository,
-                                       UserRepository userRepository) {
-        this.sessionRepository = sessionRepository;
+                                       UserRepository userRepository,
+                                       DepartmentRepository departmentRepository,
+                                       EquipmentRepository equipmentRepository) {
         this.lecturerRepository = lecturerRepository;
         this.userRepository = userRepository;
+        this.departmentRepository = departmentRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
@@ -45,6 +47,8 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
         Users student = userRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Sinh viên không tồn tại ID: " + studentId));
 
+        Departments department = departmentRepository.findByDeptId(form.getDepartmentId())
+                .orElseThrow(() -> new EntityNotFoundException("Khoa không tồn tại ID: " + studentId));;
         LocalDateTime startTime = LocalDateTime.of(form.getBookingDate(), form.getBookingTime());
 
         LocalDateTime endTime = startTime.plusMinutes(30);
@@ -52,6 +56,7 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
         MentoringSessions session = new MentoringSessions();
         session.setLecturer(lecturer);
         session.setStudent(student);
+        session.setDepartment(department);
         session.setStartTime(startTime);
         session.setEndTime(endTime);
         session.setStatus("PENDING");
@@ -92,4 +97,10 @@ public class MentoringSessionServiceImpl implements MentoringSessionService {
     public Optional<MentoringSessions> findByStudentIdAndId(Long studentId, Long sessionId) {
         return sessionRepository.findByStudentIdAndId(studentId, sessionId);
     }
+
+    @Override
+    public Page<MentoringSessions> findByStatus(String status, Pageable pageable) {
+        return sessionRepository.findByStatus(status, pageable);
+    }
+
 }

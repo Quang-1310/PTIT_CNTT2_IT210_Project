@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "mentoring_sessions")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter @Setter
 public class MentoringSessions {
     @Id
@@ -24,6 +26,10 @@ public class MentoringSessions {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Users student;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Departments department;
 
     @OneToOne(mappedBy = "mentoringSession", cascade = CascadeType.ALL)
     private AcademicEvaluations evaluation;

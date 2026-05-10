@@ -14,4 +14,6 @@ public interface UserService {
     UserProfiles findUserProfileByUserId(Long userId);
     void updateUserProfile(String email, UserProfiles updatedProfile);
     Optional<Users> findByEmail(String email);
+    boolean existsByEmail(String email);
+
 }

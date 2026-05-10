@@ -44,4 +44,8 @@ public interface EquipmentRepository extends JpaRepository<Equipments, Long> {
             "JOIN e.department d " +
             "WHERE e.isDeleted = false AND d.deptId = :deptId")
     Page<Equipments> searchByDepartmentId(@Param("deptId") Long deptId, Pageable pageable);
+
+    List<Equipments> findByLab_LabId(Long labId);
+
+    List<Equipments> findByLab_LabIdAndStockQuantityGreaterThan(Long labId, Integer quantity);
 }

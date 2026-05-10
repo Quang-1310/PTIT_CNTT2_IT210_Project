@@ -1,10 +1,111 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
 <head>
-    <meta charset="UTF-8">
     <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
 
+<div layout:fragment="adminContent">
+    <h4 class="mb-4"><i class="fas fa-boxes text-primary me-2"></i>Quản lý yêu cầu mượn thiết bị</h4>
+
+    <div class="btn-group mb-4" role="group">
+        <a th:href="@{/admin/borrowing-requests(status='PENDING')}"
+           class="btn" th:classappend="${currentStatus == 'PENDING' ? 'btn-warning' : 'btn-outline-warning'}">
+            CHỜ DUYỆT (PENDING)
+        </a>
+        <a th:href="@{/admin/borrowing-requests(status='CONFIRMED')}"
+           class="btn" th:classappend="${currentStatus == 'CONFIRMED' ? 'btn-primary' : 'btn-outline-primary'}">
+            ĐÃ XÁC NHẬN (CONFIRMED)
+        </a>
+        <a th:href="@{/admin/borrowing-requests(status='COMPLETED')}"
+           class="btn" th:classappend="${currentStatus == 'COMPLETED' ? 'btn-success' : 'btn-outline-success'}">
+            HOÀN THÀNH (COMPLETED)
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>STT</th>
+                    <th>Giảng viên</th>
+                    <th>Sinh viên</th>
+                    <th>Thiết bị mượn</th>
+                    <th>Thời gian</th>
+                    <th class="text-center">Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="req, iter : ${requests}">
+                    <td th:text="${iter.count + (currentPage * 5)}">1</td>
+                    <td th:text="${req.lecturer.user.profile.fullName}">GV Nguyễn Văn A</td>
+                    <td th:text="${req.student.profile.fullName}">Hoàng Minh Quang</td>
+                    <td>
+                        <ul class="list-unstyled mb-0 small">
+                            <li th:each="detail : ${req.borrowingRecord?.details}" class="text-primary">
+                                <i class="fas fa-tools me-1"></i>
+                                <span th:text="${detail.equipment.equipmentName}"></span>
+                                (x<span th:text="${detail.quantity}"></span>)
+                            </li>
+                        </ul>
+                    </td>
+                    <td>
+                        <small class="d-block text-muted">Bắt đầu: [[${#temporals.format(req.startTime, 'HH:mm dd/MM')}]]</small>
+                        <small class="d-block text-muted">Kết thúc: [[${#temporals.format(req.endTime, 'HH:mm dd/MM')}]]</small>
+                    </td>
+                    <td class="text-center">
+                        <form th:if="${req.status == 'CONFIRMED'}"
+                              th:action="@{/admin/borrowing-requests/export/{id}(id=${req.sessionId})}" method="post">
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('Xác nhận trừ kho và xuất thiết bị?')">
+                                <i class="fas fa-truck-loading me-1"></i> Xuất kho
+                            </button>
+                        </form>
+                        <span th:if="${req.status == 'COMPLETED'}" class="badge bg-secondary">Đã xử lý</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav th:if="${totalPages >= 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/borrowing-requests(page=${currentPage - 1}, status=${currentStatus})}">Trước</a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                class="page-item" th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" th:href="@{/admin/borrowing-requests(page=${i}, status=${currentStatus})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/borrowing-requests(page=${currentPage + 1}, status=${currentStatus})}">Sau</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 </body>
 </html>

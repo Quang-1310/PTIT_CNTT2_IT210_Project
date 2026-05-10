@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface LabService {
     List<Labs> findAll();
+    List<Labs> findByDepartmentId(Long studentDeptId);
 }

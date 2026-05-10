@@ -59,15 +59,29 @@ public class LecturerController {
     }
 
     @GetMapping("/assessment/{id}")
-    public String showAssessmentForm(@PathVariable Long id, Model model) {
+    public String showAssessmentForm(@PathVariable Long id,
+                                     @RequestParam(required = false) Long labId,
+                                     @RequestParam(required = false) String currentEval,
+                                     Model model) {
 
-        List<Labs> labs = labService.findAll();
-        List<Equipments> equipments = equipmentService.findAllActiveDefault();
         MentoringSessions sessionCurrent = sessionService.findById(id);
+        Long deptId = (sessionCurrent.getDepartment() != null)
+                ? sessionCurrent.getDepartment().getDeptId()
+                : sessionCurrent.getLecturer().getDepartment().getDeptId();
+        List<Labs> labs = labService.findByDepartmentId(deptId);
+        List<Equipments> equipments = null;
+        if (labId != null) {
+            equipments = equipmentService.findAvailableEquipmentsByLab(labId);
+        }
 
+        AssessmentDTO assessmentDTO = new AssessmentDTO();
+        assessmentDTO.setSessionId(id);
+        assessmentDTO.setLabId(labId);
+
+        if (currentEval != null) {
+            assessmentDTO.setAssessment(currentEval);
+        }
         if (!model.containsAttribute("assessmentDTO")) {
-            AssessmentDTO assessmentDTO = new AssessmentDTO();
-            assessmentDTO.setSessionId(id);
             model.addAttribute("assessmentDTO", assessmentDTO);
         }
 
@@ -101,7 +115,7 @@ public class LecturerController {
             lecturerService.completeAssessment(
                     dto.getSessionId(),
                     dto.getAssessment(),
-                    dto.getLabRoom(),
+                    dto.getLabId(),
                     dto.getEquipmentIds());
 
             ra.addFlashAttribute("successMsg",

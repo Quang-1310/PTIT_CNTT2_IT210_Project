@@ -16,4 +16,7 @@ public interface EquipmentService {
     Page<Equipments> searchByName(String keyword, Pageable pageable);
     Page<Equipments> searchByNameAndDepartmentId(String nameKeyword, Long deptId, Pageable pageable);
     Page<Equipments> searchByDepartmentId(Long deptId, Pageable pageable);
+    List<Equipments> findByLabId(Long labId);
+    List<Equipments> findAvailableEquipmentsByLab(Long labId);
+    void exportEquipmentForSession(Long sessionId);
 }

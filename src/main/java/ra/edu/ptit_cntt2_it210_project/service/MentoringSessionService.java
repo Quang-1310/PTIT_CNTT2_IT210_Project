@@ -1,5 +1,7 @@
 package ra.edu.ptit_cntt2_it210_project.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ra.edu.ptit_cntt2_it210_project.model.dto.ScheduleFormDTO;
 import ra.edu.ptit_cntt2_it210_project.model.entity.MentoringSessions;
 
@@ -15,4 +17,5 @@ public interface MentoringSessionService {
     boolean canCancel(MentoringSessions session);
     void cancelSession(Long studentId, Long id);
     Optional<MentoringSessions> findByStudentIdAndId(Long studentId, Long sessionId);
+    Page<MentoringSessions> findByStatus(String status, Pageable pageable);
 }

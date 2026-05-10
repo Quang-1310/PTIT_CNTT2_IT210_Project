@@ -10,10 +10,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ra.edu.ptit_cntt2_it210_project.model.entity.Equipments;
-import ra.edu.ptit_cntt2_it210_project.service.DepartmentService;
-import ra.edu.ptit_cntt2_it210_project.service.EquipmentService;
-import ra.edu.ptit_cntt2_it210_project.service.LabService;
+import ra.edu.ptit_cntt2_it210_project.model.dto.RegisterDTO;
+import ra.edu.ptit_cntt2_it210_project.model.entity.*;
+import ra.edu.ptit_cntt2_it210_project.service.*;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -21,20 +22,25 @@ public class AdminController {
     private final EquipmentService equipmentService;
     private final DepartmentService departmentService;
     private final LabService labService;
-    public AdminController(EquipmentService equipmentService, DepartmentService departmentService, LabService labService){
+    private final MentoringSessionService sessionService;
+    private final OverviewService overviewService;
+    private final UserService userService;
+    public AdminController(EquipmentService equipmentService, DepartmentService departmentService, LabService labService, MentoringSessionService sessionService, OverviewService overviewService, UserService userService){
         this.equipmentService = equipmentService;
         this.departmentService = departmentService;
         this.labService = labService;
+        this.sessionService = sessionService;
+        this.overviewService = overviewService;
+        this.userService = userService;
     }
 
 
-    @GetMapping("/layout")
-    public String layout(Model model) {
-        model.addAttribute("activePage", "layout");
-        model.addAttribute("totalEquipments", 120);
-        model.addAttribute("pendingCount", 3);
-        model.addAttribute("borrowingCount", 12);
-        return "admin/layout";
+    @GetMapping("/overview")
+    public String overview(Model model) {
+        Map<String, Object> stats = overviewService.getOverviewStats();
+        model.addAttribute("stats", stats);
+        model.addAttribute("activePage", "overview");
+        return "admin/overview";
     }
 
     @GetMapping("/equipment")
@@ -75,17 +81,32 @@ public class AdminController {
     }
 
     @GetMapping("/borrowing-requests")
-    public String borrowingRequests(Model model) {
+    public String listBorrowingRequests(
+            @RequestParam(defaultValue = "CONFIRMED") String status,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<MentoringSessions> requestPage = sessionService.findByStatus(status, pageable);
+
+        model.addAttribute("requests", requestPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", requestPage.getTotalPages());
         model.addAttribute("activePage", "requests");
-        model.addAttribute("pendingCount", 3);
+
         return "admin/borrowing-requests";
     }
 
-    @GetMapping("/student-borrowing")
-    public String studentBorrowing(Model model) {
-        model.addAttribute("activePage", "students");
-        model.addAttribute("pendingCount", 3);
-        return "admin/student-borrowing";
+    @PostMapping("/borrowing-requests/export/{id}")
+    public String exportEquipment(@PathVariable Long id, RedirectAttributes ra) {
+        try {
+
+            equipmentService.exportEquipmentForSession(id);
+            ra.addFlashAttribute("successMsg", "Xuất kho thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/borrowing-requests?status=CONFIRMED";
     }
 
     @GetMapping("/equipment/save")
@@ -147,5 +168,57 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("errorMsg", "Lỗi hệ thống: " + e.getMessage());
         }
         return "redirect:/admin/equipment";
+    }
+
+    @GetMapping("/add-lecturer")
+    public String addLecturerForm(Model model) {
+        model.addAttribute("registerDTO", new RegisterDTO());
+        model.addAttribute("activePage", "add-lecturer");
+        return "admin/add-lecturer";
+    }
+
+    @PostMapping("/add-lecturer")
+    public String addLecturer(@Valid @ModelAttribute("registerDTO") RegisterDTO registerDTO,
+                              BindingResult result,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            System.out.println("=== VALIDATION ERRORS ===");
+            result.getAllErrors().forEach(error ->
+                    System.out.println("Field: " + error.getDefaultMessage())
+            );
+            model.addAttribute("registerDTO", registerDTO);
+            model.addAttribute("activePage", "add-lecturer");
+            return "admin/add-lecturer";
+        }
+
+        try {
+            System.out.println("=== BẮT ĐẦU TẠO USER ===");
+            Users user = new Users();
+            user.setEmail(registerDTO.getEmail());
+            user.setPassword(userService.hash(registerDTO.getPassword()));
+            user.setRole(Role.LECTURER);
+            userService.createUser(user);
+
+            UserProfiles profile = new UserProfiles();
+            profile.setFullName(registerDTO.getFullName());
+            profile.setPhone(registerDTO.getPhone());
+            profile.setEmail(registerDTO.getEmail());
+            profile.setUser(user);
+            userService.createUserProfile(profile);
+
+            redirectAttributes.addFlashAttribute("successMsg", "Thêm tài khoản giảng viên thành công!");
+            return "redirect:/admin/overview";
+        } catch (Exception e) {
+            System.err.println("=== LỖI TẠO USER ===");
+            System.err.println("ERROR CLASS: " + e.getClass().getSimpleName());
+            System.err.println("ERROR MESSAGE: " + e.getMessage());
+            System.err.println("Email: " + registerDTO.getEmail());
+            System.err.println("Password: " + registerDTO.getPassword());
+            model.addAttribute("registerDTO", registerDTO);
+            model.addAttribute("activePage", "add-lecturer");
+            redirectAttributes.addFlashAttribute("errorMsg", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/add-lecturer";
+        }
     }
 }

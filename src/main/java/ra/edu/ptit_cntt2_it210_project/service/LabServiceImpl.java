@@ -16,4 +16,9 @@ public class LabServiceImpl implements LabService{
     public List<Labs> findAll() {
         return labRepository.findAll();
     }
+
+    @Override
+    public List<Labs> findByDepartmentId(Long studentDeptId) {
+        return labRepository.findByDepartment_DeptId(studentDeptId);
+    }
 }

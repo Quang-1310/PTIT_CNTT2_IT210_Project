@@ -21,16 +21,19 @@ public class LecturerServiceImpl implements LecturerService {
     private final AcademicEvaluationRepository evaluationRepository;
     private final BorrowingRecordRepository borrowingRepository;
     private final EquipmentRepository equipmentRepository;
+    private final LabRepository labRepository;
 
     public LecturerServiceImpl(LecturerRepository lecturerRepository,MentoringSessionRepository sessionRepository,
                                AcademicEvaluationRepository evaluationRepository,
                                BorrowingRecordRepository borrowingRepository,
-                               EquipmentRepository equipmentRepository) {
+                               EquipmentRepository equipmentRepository,
+                               LabRepository labRepository) {
         this.lecturerRepository = lecturerRepository;
         this.sessionRepository = sessionRepository;
         this.evaluationRepository = evaluationRepository;
         this.borrowingRepository = borrowingRepository;
         this.equipmentRepository = equipmentRepository;
+        this.labRepository = labRepository;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class LecturerServiceImpl implements LecturerService {
 
     @Override
     @Transactional
-    public void completeAssessment(Long sessionId, String assessment, String labRoom, List<Long> equipmentIds) {
+    public void completeAssessment(Long sessionId, String assessment, Long labId, List<Long> equipmentIds) {
         MentoringSessions session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy ca tư vấn"));
 
@@ -72,7 +75,8 @@ public class LecturerServiceImpl implements LecturerService {
 
         AcademicEvaluations eval = new AcademicEvaluations();
         eval.setAssessment(assessment);
-        eval.setAssignedLab(labRoom);
+        Labs lab = labRepository.findById(labId).orElseThrow();
+        eval.setAssignedLab(lab.getLabName());
         eval.setEvaluationDate(LocalDateTime.now());
         eval.setMentoringSession(session);
         evaluationRepository.save(eval);

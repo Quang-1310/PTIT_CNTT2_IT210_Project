@@ -48,8 +48,8 @@
             </div>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin/layout}"
-                       th:classappend="${activePage == 'layout' ? 'active' : ''}">
+                    <a class="nav-link" th:href="@{/admin/overview}"
+                       th:classappend="${activePage == 'overview' ? 'active' : ''}">
                         <i class="fas fa-chart-pie me-2"></i> Tổng quan
                     </a>
                 </li>
@@ -64,13 +64,12 @@
                        th:href="@{/admin/borrowing-requests}"
                        th:classappend="${activePage == 'requests' ? 'active' : ''}">
                         <span><i class="fas fa-tasks me-2"></i> Duyệt phiếu mượn</span>
-                        <span class="badge bg-danger rounded-pill" th:text="${pendingCount != null ? pendingCount : '0'}">0</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/admin/student-borrowing}"
-                       th:classappend="${activePage == 'students' ? 'active' : ''}">
-                        <i class="fas fa-user-graduate me-2"></i> Sinh viên mượn
+                    <a class="nav-link" th:href="@{/admin/add-lecturer}"
+                       th:classappend="${activePage == 'add-lecturer' ? 'active' : ''}">
+                        <i class="fas fa-user-graduate me-2"></i> Thêm tài khoản
                     </a>
                 </li>
             </ul>
@@ -78,9 +77,6 @@
 
         <div class="admin-main-content">
             <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-bold text-dark" layout:fragment="pageTitle">Tiêu đề</h3>
-                </div>
                 <div layout:fragment="adminContent">
 
                 </div>

@@ -12,5 +12,5 @@ public interface LecturerService {
     List<Lecturers> findAllActive();
     Lecturers findByUserId(Long userId);
     Page<MentoringSessions> findPendingByLecturer(Long lecturerId, Pageable page);
-    void completeAssessment(Long sessionId, String assessment, String labRoom, List<Long> equipmentIds);
+    void completeAssessment(Long sessionId, String assessment, Long labId, List<Long> equipmentIds);
 }
