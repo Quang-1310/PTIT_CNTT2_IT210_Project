@@ -8,6 +8,7 @@ import ra.edu.ptit_cntt2_it210_project.model.entity.BorrowingDetails;
 import ra.edu.ptit_cntt2_it210_project.model.entity.BorrowingRecords;
 import ra.edu.ptit_cntt2_it210_project.model.entity.Equipments;
 import ra.edu.ptit_cntt2_it210_project.model.entity.MentoringSessions;
+import ra.edu.ptit_cntt2_it210_project.repository.BorrowingDetailRepository;
 import ra.edu.ptit_cntt2_it210_project.repository.EquipmentRepository;
 import ra.edu.ptit_cntt2_it210_project.repository.MentoringSessionRepository;
 
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class EquipmentServiceImpl implements EquipmentService{
     private final EquipmentRepository equipmentRepository;
     private final MentoringSessionRepository sessionRepository;
-    public EquipmentServiceImpl(EquipmentRepository equipmentRepository, MentoringSessionRepository sessionRepository){
+    private final BorrowingDetailRepository borrowingDetailRepository;
+    public EquipmentServiceImpl(EquipmentRepository equipmentRepository, MentoringSessionRepository sessionRepository, BorrowingDetailRepository borrowingDetailRepository){
         this.equipmentRepository = equipmentRepository;
         this.sessionRepository = sessionRepository;
+        this.borrowingDetailRepository = borrowingDetailRepository;
     }
 
     @Override
@@ -90,7 +93,7 @@ public class EquipmentServiceImpl implements EquipmentService{
     }
 
     private boolean isEquipmentBeingBorrowed(Long equipmentId) {
-        return false;
+        return borrowingDetailRepository.isEquipmentInActiveSession(equipmentId);
     }
 
     @Override

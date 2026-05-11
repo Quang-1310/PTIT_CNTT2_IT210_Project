@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ra.edu.ptit_cntt2_it210_project.model.dto.EquipmentDTO;
 import ra.edu.ptit_cntt2_it210_project.model.dto.RegisterDTO;
 import ra.edu.ptit_cntt2_it210_project.model.entity.*;
 import ra.edu.ptit_cntt2_it210_project.service.*;
@@ -112,7 +113,7 @@ public class AdminController {
     @GetMapping("/equipment/save")
     public String addEquipment(Model model) {
         model.addAttribute("activePage", "equipment");
-        model.addAttribute("equipment", new Equipments());
+        model.addAttribute("equipment", new EquipmentDTO());
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("labs", labService.findAll());
         model.addAttribute("isNew", true);
@@ -123,7 +124,15 @@ public class AdminController {
     public String editEquipment(@PathVariable Long id, Model model) {
         model.addAttribute("activePage", "equipment");
         Equipments equipment = equipmentService.findEquipmentsByEquipmentId(id);
-        model.addAttribute("equipment", equipment);
+        EquipmentDTO dto = new EquipmentDTO();
+        dto.setEquipmentId(equipment.getEquipmentId());
+        dto.setEquipmentName(equipment.getEquipmentName());
+        dto.setStockQuantity(equipment.getStockQuantity());
+        dto.setDescription(equipment.getDescription());
+        dto.setLab(equipment.getLab());
+        dto.setDepartments(equipment.getDepartment());
+
+        model.addAttribute("equipment", dto);
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("labs", labService.findAll());
         model.addAttribute("isNew", false);
@@ -131,7 +140,7 @@ public class AdminController {
     }
 
     @PostMapping("/equipment/save")
-    public String saveEquipment(@Valid @ModelAttribute("equipment") Equipments equipment,
+    public String saveEquipment(@Valid @ModelAttribute("equipment") EquipmentDTO equipment,
                                 BindingResult result,
                                 RedirectAttributes redirectAttributes,
                                 Model model) {
@@ -142,10 +151,22 @@ public class AdminController {
             return "admin/equipment-form";
         }
 
+        Equipments equipments;
+        if (equipment.getEquipmentId() != null) {
+            equipments = equipmentService.findEquipmentsByEquipmentId(equipment.getEquipmentId());
+        } else {
+            equipments = new Equipments();
+        }
+
         try {
-            equipmentService.addEquipment(equipment);
+            equipments.setEquipmentName(equipment.getEquipmentName());
+            equipments.setLab(equipment.getLab());
+            equipments.setDepartment(equipment.getDepartments());
+            equipments.setDescription(equipment.getDescription());
+            equipments.setStockQuantity(equipment.getStockQuantity());
+            equipmentService.addEquipment(equipments);
             redirectAttributes.addFlashAttribute("successMsg",
-                    "Lưu thiết bị " + equipment.getEquipmentName() + " thành công!");
+                    "Lưu thiết bị " + equipments.getEquipmentName() + " thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMsg", e.getMessage());
             model.addAttribute("departments", departmentService.findAll());

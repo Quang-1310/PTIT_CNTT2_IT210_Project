@@ -6,6 +6,12 @@
 <head>
   <title th:text="${equipment.equipmentId == null ? 'Thêm thiết bị mới' : 'Chỉnh sửa thiết bị'}"></title>
 </head>
+<style>
+  .error-message {
+    font-size: 0.85rem;
+    color: #dc3545;
+  }
+</style>
 <body>
 
 <th:block layout:fragment="pageTitle">
@@ -27,7 +33,7 @@
     <div class="card-body p-4">
       <form th:action="@{/admin/equipment/save}" th:object="${equipment}" method="post" novalidate>
         <input type="hidden" th:field="*{equipmentId}">
-        <input type="hidden" th:field="*{isDeleted}" />
+<!--        <input type="hidden" th:field="*{isDeleted}" />-->
 
         <div class="row">
           <!-- TÊN THIẾT BỊ -->
@@ -36,13 +42,8 @@
             <input type="text"
                    class="form-control"
                    th:field="*{equipmentName}"
-                   placeholder="Ví dụ: Máy chiếu Sony, Arduino Uno..."
-                   required>
-            <!-- ERROR DISPLAY -->
-            <div th:if="${#fields.hasErrors('equipmentName')}" class="invalid-feedback d-block">
-              <i class="fas fa-exclamation-circle me-1"></i>
-              <span th:errors="*{equipmentName}">Lỗi validation</span>
-            </div>
+                   placeholder="Ví dụ: Máy chiếu Sony, Arduino Uno...">
+            <div class="error-message mt-1" th:if="${#fields.hasErrors('equipmentName')}" th:errors="*{equipmentName}"></div>
           </div>
 
           <!--  SỐ LƯỢNG -->
@@ -52,29 +53,21 @@
                    class="form-control"
                    th:field="*{stockQuantity}"
                    min="0"
-                   placeholder="0"
-                   required>
+                   placeholder="0">
             <!-- ERROR DISPLAY -->
-            <div th:if="${#fields.hasErrors('stockQuantity')}" class="invalid-feedback d-block">
-              <i class="fas fa-exclamation-circle me-1"></i>
-              <span th:errors="*{stockQuantity}">Số lượng không hợp lệ</span>
-            </div>
+            <div class="error-message mt-1" th:if="${#fields.hasErrors('stockQuantity')}" th:errors="*{stockQuantity}"></div>
           </div>
 
           <!-- KHOA -->
           <div class="col-md-6 mb-3">
             <label class="form-label fw-bold">Khoa quản lý <span class="text-danger">*</span></label>
-            <select class="form-select" th:field="*{department.deptId}">
+            <select class="form-select" th:field="*{departments}">
               <option value="">-- Chọn Khoa --</option>
               <option th:each="dept : ${departments}"
                       th:value="${dept.deptId}"
                       th:text="${dept.deptName}"></option>
             </select>
-            <!-- ERROR DISPLAY -->
-            <div th:if="${#fields.hasErrors('department')}" class="invalid-feedback d-block">
-              <i class="fas fa-exclamation-circle me-1"></i>
-              <span th:errors="*{department}">Vui lòng chọn Khoa</span>
-            </div>
+            <div class="error-message mt-1" th:if="${#fields.hasErrors('departments')}" th:errors="*{departments}"></div>
           </div>
 
           <!--  PHÒNG LAB -->
@@ -86,11 +79,7 @@
                       th:value="${l.labId}"
                       th:text="${l.labName}"></option>
             </select>
-            <!-- ERROR DISPLAY -->
-            <div th:if="${#fields.hasErrors('lab')}" class="invalid-feedback d-block">
-              <i class="fas fa-exclamation-circle me-1"></i>
-              <span th:errors="*{lab}">Vui lòng chọn Phòng Lab</span>
-            </div>
+            <div class="error-message mt-1" th:if="${#fields.hasErrors('lab')}" th:errors="*{lab}"></div>
           </div>
 
           <!--  MÔ TẢ -->
@@ -100,11 +89,7 @@
                       th:field="*{description}"
                       rows="4"
                       placeholder="Nhập cấu hình, tình trạng thiết bị..."></textarea>
-            <!-- ERROR DISPLAY -->
-            <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback d-block">
-              <i class="fas fa-exclamation-circle me-1"></i>
-              <span th:errors="*{description}">Mô tả quá dài</span>
-            </div>
+            <div class="error-message mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
           </div>
         </div>
 
